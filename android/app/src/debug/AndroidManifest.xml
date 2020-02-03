@@ -1,0 +1,11 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.smartcity.smart_city">
+    <!-- Flutter needs it to communicate with the running application
+         to allow setting breakpoints, to provide hot reload, etc.
+    -->
+    <application>
+    <meta-data android:name="com.google.android.maps.v2.API_KEY"
+        android:value="AIzaSyDVViEq6fcJda1upv1qt38-FPpR5aAlC0c"/>
+    </application>
+    <uses-permission android:name="android.permission.INTERNET"/>
+</manifest>
