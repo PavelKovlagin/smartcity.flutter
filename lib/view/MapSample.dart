@@ -2,8 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:smart_city/AddEvent.dart';
-
 
 class MapSample extends StatefulWidget{
   @override
@@ -14,7 +12,7 @@ class MapSample extends StatefulWidget{
 
 class MapSampleState extends State<MapSample> {
   Completer<GoogleMapController> _controller = Completer();
-  static double _latitude = 45.123453, _longitude = 55.326584;
+  static double _latitude = 56.126880, _longitude = 40.397106;
   static final CameraPosition _kGooglePlex =
   CameraPosition(target: LatLng(_latitude, _longitude), zoom: 14.4746
   );

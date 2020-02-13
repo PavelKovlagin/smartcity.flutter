@@ -3,10 +3,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:smart_city/AddEvent.dart';
+import 'package:smart_city/view/AddEvent.dart';
+import 'package:smart_city/view/FormEvent.dart';
 
-import 'MapSample.dart';
-import 'Profile.dart';
+import 'view/MapSample.dart';
+import 'view/Profile.dart';
+import 'view/Register.dart';
 
 void main(){
   runApp(MaterialApp(
@@ -14,6 +16,8 @@ void main(){
     routes: {
       '/addEvent': (BuildContext context) => AddEvent.def(),
       '/map': (BuildContext context) => MyApp(),
+      '/register': (BuildContext context) => Register(),
+      '/event': (BuildContext context) => FormEvent()
     },
       onGenerateRoute: (routeSettings){
       var path = routeSettings.name.split('/');
