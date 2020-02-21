@@ -10,6 +10,8 @@ class Register extends StatefulWidget {
 
 class RegisterState extends State<Register> {
 
+
+
   User user = new User();
 
   final _formKey = GlobalKey<FormState>();
@@ -88,7 +90,8 @@ class RegisterState extends State<Register> {
               _formKey.currentState.save();
               if (_formKey.currentState.validate())
                 return showDialog(
-                    context: context, builder: (BuildContext context) {
+                    context: context, 
+                    builder: (BuildContext context) {
                   return AlertDialog(title: Text("Проверка"), content: Text(user.toString()),
                   );
                 });

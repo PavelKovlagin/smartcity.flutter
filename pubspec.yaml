@@ -19,7 +19,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  google_maps_flutter: ^0.5.5
+  http: any
+  sqflite: any
+  path_provider: any
+  geolocator: any
+  flutter_map: any
+  flutter_map_marker_cluster: any
+  latlong: 0.6.1
   flutter_datetime_picker: 1.2.5
   shared_preferences: 0.5.2
 

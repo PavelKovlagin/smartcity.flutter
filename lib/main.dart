@@ -2,7 +2,6 @@ import 'dart:async';
 
 
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:smart_city/view/AddEvent.dart';
 import 'package:smart_city/view/FormEvent.dart';
 
@@ -35,9 +34,7 @@ void main(){
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Home(),
-    );
+    return Home();
   }
 }
 
@@ -65,9 +62,6 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Smart City"),
-      ),
       body: _children[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         onTap: onTabTapped,
@@ -86,3 +80,4 @@ class _HomeState extends State<Home> {
     );
   }
 }
+

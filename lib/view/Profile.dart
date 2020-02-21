@@ -13,6 +13,9 @@ class ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text("Профиль"),
+      ),
       body: Container(
         padding: EdgeInsets.all(16.0),
         child: Column(
