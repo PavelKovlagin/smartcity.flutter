@@ -3,14 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:smart_city/model/User.dart';
 
-class Register extends StatefulWidget {
+class FormRegister extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => RegisterState();
+  State<StatefulWidget> createState() => FormRegisterState();
 }
 
-class RegisterState extends State<Register> {
-
-
+class FormRegisterState extends State<FormRegister> {
 
   User user = new User();
 
@@ -32,7 +30,7 @@ class RegisterState extends State<Register> {
                 new TextFormField(validator: (value){
                   if (value.isEmpty) return "Введите email";
                 },
-                  initialValue: "blablabla",
+                  initialValue: "someEmail@mail.ru",
                   onSaved: (value) {
                   user.email = value;
                   },

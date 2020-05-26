@@ -20,8 +20,8 @@ dependencies:
   flutter:
     sdk: flutter
   http: any
+  basic_utils: any
   sqflite: any
-  path_provider: any
   geolocator: any
   flutter_map: any
   flutter_map_marker_cluster: any

@@ -1,14 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class Profile extends StatefulWidget{
+class FormProfile extends StatefulWidget{
   @override
   State<StatefulWidget> createState() {
-    return ProfileState();
+    return FormProfileState();
   }
 }
 
-class ProfileState extends State<Profile> {
+class FormProfileState extends State<FormProfile> {
 
   @override
   Widget build(BuildContext context) {

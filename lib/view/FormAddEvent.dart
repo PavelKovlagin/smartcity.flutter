@@ -2,31 +2,31 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class AddEvent extends StatefulWidget{
+class FormAddEvent extends StatefulWidget{
 
   String _latitude, _longitude;
 
-  AddEvent.def() {
+  FormAddEvent.def() {
 
   }
 
-  AddEvent.LatLon(String _latitude, String _longitude){
+  FormAddEvent.LatLon(String _latitude, String _longitude){
     this._longitude = _longitude;
     this._latitude = _latitude;
   }
 
   @override
   State<StatefulWidget> createState() {
-    return AddEventState(_latitude, _longitude);
+    return FormAddEventState(_latitude, _longitude);
   }
 
 }
 
-class AddEventState extends State<AddEvent>{
+class FormAddEventState extends State<FormAddEvent>{
 
   String _latitude, _longitude;
 
-  AddEventState(String _latitude, String _longitude) {
+  FormAddEventState(String _latitude, String _longitude) {
     this._latitude = _latitude;
     this._longitude = _longitude;
   }

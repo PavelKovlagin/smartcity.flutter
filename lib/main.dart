@@ -1,34 +1,39 @@
 import 'dart:async';
 
-
 import 'package:flutter/material.dart';
-import 'package:smart_city/view/AddEvent.dart';
+import 'package:smart_city/view/FormAddEvent.dart';
 import 'package:smart_city/view/FormEvent.dart';
 
-import 'view/MapSample.dart';
-import 'view/Profile.dart';
-import 'view/Register.dart';
+import 'view/FormMapSample.dart';
+import 'view/FormProfile.dart';
+import 'view/FormRegister.dart';
 
-void main(){
+void main() {
   runApp(MaterialApp(
-    initialRoute: '/map',
-    routes: {
-      '/addEvent': (BuildContext context) => AddEvent.def(),
-      '/map': (BuildContext context) => MyApp(),
-      '/register': (BuildContext context) => Register(),
-      '/event': (BuildContext context) => FormEvent()
-    },
-      onGenerateRoute: (routeSettings){
-      var path = routeSettings.name.split('/');
-
-      if (path[1] == 'addEvent') {
-        return new MaterialPageRoute(
-          builder: (context) => new AddEvent.LatLon(path[2], path[3]),
-          settings: routeSettings,
-        );
-      }
-    }
-  ));
+      initialRoute: '/map',
+      routes: {
+        '/addEvent': (BuildContext context) => FormAddEvent.def(),
+        '/map': (BuildContext context) => MyApp(),
+        '/register': (BuildContext context) => FormRegister(),
+        '/event': (BuildContext context) => FormEvent.def()
+      },
+      onGenerateRoute: (routeSettings) {
+        var path = routeSettings.name.split('/');
+        switch (path[1]) {
+          case 'addEvent':
+            return new MaterialPageRoute(
+              builder: (context) => new FormAddEvent.LatLon(path[2], path[3]),
+              settings: routeSettings,
+            );
+            break;
+          case 'event':
+            return new MaterialPageRoute(
+              builder: (context) => new FormEvent.event_id(path[2]),
+              settings: routeSettings,
+            );
+            break;
+        }
+      }));
 }
 
 class MyApp extends StatelessWidget {
@@ -38,7 +43,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class Home extends StatefulWidget{
+class Home extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
@@ -49,8 +54,8 @@ class Home extends StatefulWidget{
 class _HomeState extends State<Home> {
   int _currentIndex = 0;
   final List<Widget> _children = [
-    MapSample(),
-    Profile(),
+    FormMapSample(),
+    FormProfile(),
   ];
 
   void onTabTapped(int index) {
@@ -80,4 +85,3 @@ class _HomeState extends State<Home> {
     );
   }
 }
-

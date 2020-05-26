@@ -1,15 +1,3 @@
-// class EventsList{
-//   final List<Event> events;
-
-//   EventsList(this.events);
-
-//   factory EventsList.fromJson(List<dynamic> json) {
-//     List<Event> events = new List<Event>();
-//     events = json.map((i)=>Event.fromJson(i)).toList();
-//     return new EventsList(events);
-//   }
-// }
-
 class Event{
 
   int _event_id;
@@ -21,8 +9,11 @@ class Event{
   String _dateChange;
   int _status_id;
   String _statusName;
+  int _category_id;
+  String _category_name;
   int _user_id;
   String _email;
+  int _visibilityForUser;
 
   Event(int event_id, 
         String eventName, 
@@ -33,8 +24,11 @@ class Event{
         String dateChange, 
         int status_id, 
         String statusName, 
+        int category_id,
+        String category_name,
         int user_id,
-        String email) {
+        String email,
+        int visibilityForUser) {
     _event_id = event_id;
     _eventName = eventName;
     _eventDescription = eventDescription;
@@ -44,13 +38,17 @@ class Event{
     _dateChange = dateChange;
     _status_id = status_id;
     _statusName = statusName;
+    _category_id = status_id;
+    _category_name = category_name;
+    _statusName = statusName;
     _user_id = user_id;
     _email = email;
+    _visibilityForUser = visibilityForUser;
   }
 
   factory Event.fromJson(Map<String, dynamic> json){
     return Event(
-      json["event_id"],
+      json["id"],
       json["eventName"],
       json["eventDescription"],
       json["latitude"],
@@ -59,8 +57,11 @@ class Event{
       json["dateChange"],
       json["status_id"],
       json["statusName"],
+      json["category_id"],
+      json["category_name"],
       json["user_id"],
-      json["email"]
+      json["email"],
+      json["visibilityForUser"]
     ); 
   }
 
@@ -113,4 +114,6 @@ class Event{
   get user_id => _user_id;
 
   get email => _email; 
+  
+  get visibilityForUser => _visibilityForUser;
 }

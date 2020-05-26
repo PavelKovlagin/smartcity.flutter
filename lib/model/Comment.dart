@@ -1,13 +1,17 @@
 class Comment {
 
-  Comment.def() {
-
-  }
-
-  Comment.three(String email, String date, String text) {
+  Comment(String email, String date, String text) {
     this._email = email;
     this._date = date;
     this._text = text;
+  }
+
+  factory Comment.fromJson(Map<String, dynamic> json){
+    return Comment(
+      json["email"],
+      json["dateTime"],
+      json["text"],
+    ); 
   }
 
   String _email;
