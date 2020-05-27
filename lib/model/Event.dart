@@ -51,8 +51,8 @@ class Event{
       json["id"],
       json["eventName"],
       json["eventDescription"],
-      json["latitude"],
-      json["longitude"],
+      json["latitude"].toDouble(),
+      json["longitude"].toDouble(),
       json["eventDate"],
       json["dateChange"],
       json["status_id"],
@@ -116,4 +116,10 @@ class Event{
   get email => _email; 
   
   get visibilityForUser => _visibilityForUser;
+
+  @override
+  String toString() {
+    // TODO: implement toString
+    return _eventName + " " + _eventDescription + " " + _latitude.toString() + " " + _longitude.toString();
+  }
 }

@@ -55,7 +55,7 @@ class FormMapSampleState extends State<FormMapSample> {
   List<Marker> eventMarkers = new List<Marker>();
 
   Future _getEvents() async {
-    var events = await RestApi.getEventsResponse("2000-11-11 11:11:11");
+    var events = await RestApi.getEventsResponse("2000-05-26 11:11:11");
     return events;
   }
 

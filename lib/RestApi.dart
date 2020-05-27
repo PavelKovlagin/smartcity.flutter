@@ -5,7 +5,7 @@ import 'package:smart_city/model/Comment.dart';
 import 'package:smart_city/model/Event.dart';
 
 class RestApi {
-  static String server = 'http://95.66.217.238:777/api/'; 
+  static String server = 'http://95.66.217.238:777'; 
 
   static Future _getResponse(String link) async{
     try{
@@ -22,11 +22,11 @@ class RestApi {
   }
 
   static Future getEventsResponse(String date)  {
-    return _getResponse(server + "events?dateChange=" + date);        
+    return _getResponse(server + "/api/events?dateChange=" + date);        
   }
 
   static Future getEventResponse(String event_id) {
-    return _getResponse(server + "event?event_id=" + event_id);
+    return _getResponse(server + "/api/event?event_id=" + event_id);
   }
 
   static Future<List<Event>> getEventResponse2(String event_id) async {
