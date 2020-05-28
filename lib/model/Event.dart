@@ -15,6 +15,10 @@ class Event{
   String _email;
   int _visibilityForUser;
 
+  Event.def(){
+    
+  }
+
   Event(int event_id, 
         String eventName, 
         String eventDescription, 
