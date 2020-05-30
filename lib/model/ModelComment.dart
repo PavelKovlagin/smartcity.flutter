@@ -1,29 +1,33 @@
 import 'ModelImage.dart';
 
-class Comment {
+class ModelComment {
 
-  Comment(List<ModelImage> commentImages, String email, String date, String text) {
+  ModelComment(List<ModelImage> commentImages, int user_id, String email, String date, String text) {
     this._commentImages = commentImages;
+    this._user_id = user_id;
     this._email = email;
     this._date = date;
     this._text = text;
   }
 
-  factory Comment.fromJson(Map<String, dynamic> json){
+  factory ModelComment.fromJson(Map<String, dynamic> json){
     print(json["commentImages"]);
-    return Comment(
+    return ModelComment(
       json["commentImages"].map<ModelImage>((json)=>ModelImage.fromJson(json)).toList(),
+      json["user_id"],
       json["email"],
       json["dateTime"],
       json["text"],
     ); 
   }
 
+  int _user_id;
   String _email;
   String _date;
   String _text;
   List<ModelImage> _commentImages;
 
+  int get user_id => _user_id;
   String get email => _email;
   List<ModelImage> get commentImages => _commentImages;
 

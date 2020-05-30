@@ -1,4 +1,4 @@
-class Event{
+class ModelEvent{
 
   int _event_id;
   String _eventName;
@@ -15,11 +15,11 @@ class Event{
   String _email;
   int _visibilityForUser;
 
-  Event.def(){
+  ModelEvent.def(){
     
   }
 
-  Event(int event_id, 
+  ModelEvent(int event_id, 
         String eventName, 
         String eventDescription, 
         double latitude, 
@@ -50,8 +50,8 @@ class Event{
     _visibilityForUser = visibilityForUser;
   }
 
-  factory Event.fromJson(Map<String, dynamic> json){
-    return Event(
+  factory ModelEvent.fromJson(Map<String, dynamic> json){
+    return ModelEvent(
       json["id"],
       json["eventName"],
       json["eventDescription"],

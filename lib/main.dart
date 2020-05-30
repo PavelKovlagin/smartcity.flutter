@@ -15,7 +15,8 @@ void main() {
         '/addEvent': (BuildContext context) => FormAddEvent.def(),
         '/map': (BuildContext context) => MyApp(),
         '/register': (BuildContext context) => FormRegister(),
-        '/event': (BuildContext context) => FormEvent.def()
+        '/event': (BuildContext context) => FormEvent.def(),
+        '/profile': (BuildContext context) => FormProfile()
       },
       onGenerateRoute: (routeSettings) {
         var path = routeSettings.name.split('/');
@@ -32,6 +33,12 @@ void main() {
               settings: routeSettings,
             );
             break;
+          case 'profile':
+          return new MaterialPageRoute(
+            builder: (context) => new FormProfile.user_id(path[2]),
+            settings: routeSettings,
+          );
+          break;
         }
       }));
 }

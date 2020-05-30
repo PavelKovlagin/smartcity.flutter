@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:smart_city/RestApi.dart';
-import 'package:smart_city/model/Comment.dart';
-import 'package:smart_city/model/Event.dart';
+import 'package:smart_city/model/ModelComment.dart';
+import 'package:smart_city/model/ModelEvent.dart';
 import 'package:smart_city/model/ModelImage.dart';
 
 class FormEvent extends StatefulWidget {
@@ -25,8 +25,8 @@ class FormEvent extends StatefulWidget {
 
 class FormEventState extends State<FormEvent> {
 
-  Event event = Event.def();
-  List<Comment> comments = List<Comment>();
+  ModelEvent event = ModelEvent.def();
+  List<ModelComment> comments = List<ModelComment>();
   List<ModelImage> images = List<ModelImage>();
   String _event_id;
   final _formKey = GlobalKey<FormState>();
@@ -129,7 +129,7 @@ class FormEventState extends State<FormEvent> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-            Text("Называние события: " + event.eventName),
+            Text("Название события: " + event.eventName),
             Text("Описание события: " + event.eventDescription),
             Text("Статус события: " + event.statusName),
             Text("Пользователь: " + event.email),
@@ -154,8 +154,15 @@ class FormEventState extends State<FormEvent> {
             return Card(
               child: Column (
                 children: <Widget>[
+                  
                   ListTile(
-                    title: Text(comment.email + " " + comment.date),
+                    title: InkWell(
+                      child: Text(
+                        comment.email + " " + comment.date), 
+                        onTap: () {
+                          Navigator.pushNamed(context,'/profile/' + comment.user_id.toString()); 
+                        },
+                    ),
                     subtitle: Text(comment.text),
                   ),
                   new Container(                    
@@ -173,7 +180,14 @@ class FormEventState extends State<FormEvent> {
                         ); 
                       }
                     )
-                  )
+                  ),
+                  RaisedButton(
+                    child: Icon(Icons.delete_forever),
+                    color: Colors.blue,
+                    textColor: Colors.white,
+                    onPressed: (){
+                      
+                    },)
                 ],
               )
             );
@@ -278,8 +292,8 @@ class FormEventState extends State<FormEvent> {
                      )
                    );
                 } else {
-                  event = Event.fromJson(snapshot.data["data"]["event"]);
-                  comments = snapshot.data["data"]["comments"].map<Comment>((json)=>Comment.fromJson(json)).toList();
+                  event = ModelEvent.fromJson(snapshot.data["data"]["event"]);
+                  comments = snapshot.data["data"]["comments"].map<ModelComment>((json)=>ModelComment.fromJson(json)).toList();
                   images = snapshot.data["data"]["event"]["eventImages"].map<ModelImage>((json)=>ModelImage.fromJson(json)).toList();
                   return Form(
                   key: _formKey,
@@ -324,10 +338,10 @@ class FormEventStateNonEdit extends State<FormEvent> {
             future: RestApi.getEventResponse(_event_id.toString()),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
-                Event event = Event.fromJson(snapshot.data["data"]["event"]);
-                List<Comment> comments = snapshot.data["data"]["comments"].map<Comment>((json)=>Comment.fromJson(json)).toList();
+                ModelEvent event = ModelEvent.fromJson(snapshot.data["data"]["event"]);
+                List<ModelComment> comments = snapshot.data["data"]["comments"].map<ModelComment>((json)=>ModelComment.fromJson(json)).toList();
                 List<ModelImage> images = snapshot.data["data"]["event"]["eventImages"].map<ModelImage>((json)=>ModelImage.fromJson(json)).toList();
-                for (Comment comment in comments){
+                for (ModelComment comment in comments){
                   for (ModelImage commentImage in comment.commentImages){
                     print(commentImage.image_name);
                   }

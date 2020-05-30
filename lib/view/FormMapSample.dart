@@ -7,7 +7,7 @@ import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong/latlong.dart';
 import 'package:smart_city/RestApi.dart';
-import 'package:smart_city/model/Event.dart';
+import 'package:smart_city/model/ModelEvent.dart';
 
 class FormMapSample extends StatefulWidget {
   @override
@@ -64,7 +64,7 @@ class FormMapSampleState extends State<FormMapSample> {
     return event;
   }
   
-  addMarkers(List<Event> events) {   
+  addMarkers(List<ModelEvent> events) {   
     eventMarkers = new List<Marker>(); 
     for (var event in events) {
       if (event.visibilityForUser == 1) {
@@ -250,7 +250,7 @@ class FormMapSampleState extends State<FormMapSample> {
                         if (content["success"]){
                           print(content["success"]);
                           print(content["data"]);
-                          List<Event>events = content["data"].map<Event>((json)=>Event.fromJson(json)).toList();
+                          List<ModelEvent>events = content["data"].map<ModelEvent>((json)=>ModelEvent.fromJson(json)).toList();
                           addMarkers(events);
                         } else {
                           _showMyDialog(content["message"].toString());

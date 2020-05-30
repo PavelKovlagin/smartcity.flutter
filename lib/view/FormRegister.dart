@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
-import 'package:smart_city/model/User.dart';
+import 'package:smart_city/model/ModelUser.dart';
 
 class FormRegister extends StatefulWidget {
   @override
@@ -10,10 +10,11 @@ class FormRegister extends StatefulWidget {
 
 class FormRegisterState extends State<FormRegister> {
 
-  User user = new User();
+  ModelUser user = new ModelUser.empty();
 
   final _formKey = GlobalKey<FormState>();
   var _todayDate = new DateTime.now();
+  String password = "";
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +42,7 @@ class FormRegisterState extends State<FormRegister> {
               if (value.length < 8) return "Пароль должен содержать не менее 8 символов";
             },
               onSaved: (value) {
-              user.password = value;
+              password = value;
               },
               decoration: InputDecoration(labelText: "Password"),
               keyboardType: TextInputType.visiblePassword,
@@ -55,9 +56,9 @@ class FormRegisterState extends State<FormRegister> {
             ),
             new TextFormField(
               onSaved: (value) {
-                user.name = value;
+                user.user_name = value;
               },
-              initialValue: user.name,
+              initialValue: user.user_name,
               decoration: InputDecoration(labelText: "Имя"),
             ),
             new TextFormField(
