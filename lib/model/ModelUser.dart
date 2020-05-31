@@ -5,22 +5,28 @@ class ModelUser {
   String _user_name;
   String _surname;
   String _subname;
-  String _date;
+  DateTime _date;
   String _email;
-  String _blockDate;
+  DateTime _blockDate;
   bool _blocked;
 
   ModelUser.empty(){
-
+    _user_id = 0;
+    _user_name = "";
+    _surname = "";
+    _date = DateTime.parse('0000-01-01');
+    _email = "";
+    _blockDate = DateTime.parse('0000-01-01');
+    _blocked = false;
   }
 
   ModelUser(int user_id, 
             String user_name, 
             String surname, 
             String subname, 
-            String date,
+            DateTime date,
             String email,
-            String blockDate,
+            DateTime blockDate,
             bool blocked) {
     _user_id = user_id;
     _user_name = user_name;
@@ -33,14 +39,22 @@ class ModelUser {
   }
 
   factory ModelUser.fromJson(Map<String, dynamic> json){
+    DateTime date;
+    print(json["date"]);
+    if (json["date"] == null) {
+      date = DateTime.now();      
+    } else {
+      date = DateTime.parse(json['date']);      
+    }
+    print(date);
     return ModelUser(
       json['user_id'] as int,
       json['user_name'] as String,
       json['surname'] as String,
       json['subname'] as String,
-      json['date'] as String,
+      date,
       json['email'] as String,
-      json['blockDate'] as String,
+      DateTime.parse(json['blockDate']),
       json['blocked'] as bool
     );
   }
@@ -49,9 +63,9 @@ class ModelUser {
   String get user_name => _user_name;
   String get surname => _surname;
   String get subname => _subname;
-  String get date => _date;
+  DateTime get date => _date;
   String get email => _email;
-  String get blockDate =>  _blockDate;
+  DateTime get blockDate =>  _blockDate;
   bool get blocked => _blocked;
 
   set user_id(int value) {
@@ -70,7 +84,7 @@ class ModelUser {
     _subname = value;
   }
 
-  set date(String value) {
+  set date(DateTime value) {
     _date = value;
   }
 
@@ -78,7 +92,7 @@ class ModelUser {
     _email = value;
   }
 
-  set blockDate(String value) {
+  set blockDate(DateTime value) {
     _blockDate = value;
   }
 
@@ -86,8 +100,16 @@ class ModelUser {
     _blocked = value;
   }
   
+  String stringBlockDate(){
+    return _blockDate.day.toString() + '.' + _blockDate.month.toString() + '.' + _blockDate.year.toString(); 
+  }
+
+  String stringDate() {
+    return _date.day.toString() + '.' + _date.month.toString() + '.' + _date.year.toString(); 
+  }
+
   @override
   String toString() {
-    return _email + " " +_surname + " " + _user_name + " " +_subname + " " + _date;
+    return _email + " " +_surname + " " + _user_name + " " +_subname + " " + stringDate();
   }
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:smart_city/view/FormAddEvent.dart';
+import 'package:smart_city/view/FormAuth.dart';
 import 'package:smart_city/view/FormEvent.dart';
 
 import 'view/FormMapSample.dart';
@@ -16,7 +17,8 @@ void main() {
         '/map': (BuildContext context) => MyApp(),
         '/register': (BuildContext context) => FormRegister(),
         '/event': (BuildContext context) => FormEvent.def(),
-        '/profile': (BuildContext context) => FormProfile()
+        '/profile': (BuildContext context) => FormProfile(),
+        '/auth': (BuildContext context) => FormAuth()
       },
       onGenerateRoute: (routeSettings) {
         var path = routeSettings.name.split('/');

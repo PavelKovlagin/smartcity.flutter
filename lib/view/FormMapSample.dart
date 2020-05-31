@@ -248,10 +248,13 @@ class FormMapSampleState extends State<FormMapSample> {
                       Future future = _getEvents();
                       future.then((content){
                         if (content["success"]){
-                          print(content["success"]);
+                          
+                          setState(() {
+                            print(content["success"]);
                           print(content["data"]);
                           List<ModelEvent>events = content["data"].map<ModelEvent>((json)=>ModelEvent.fromJson(json)).toList();
                           addMarkers(events);
+                          });
                         } else {
                           _showMyDialog(content["message"].toString());
                         }                     

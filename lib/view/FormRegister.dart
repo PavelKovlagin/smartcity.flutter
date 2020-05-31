@@ -18,7 +18,7 @@ class FormRegisterState extends State<FormRegister> {
 
   @override
   Widget build(BuildContext context) {
-    user.date = _todayDate.year.toString()+"."+_todayDate.month.toString()+"."+_todayDate.day.toString();
+    user.date = _todayDate;
     return Scaffold(
       //resizeToAvoidBottomPadding: false,
       appBar: AppBar(
@@ -67,23 +67,23 @@ class FormRegisterState extends State<FormRegister> {
               },
               decoration: InputDecoration(labelText: "Отчество"),
             ),
-                Row(children: <Widget>[
-                  Text(user.date),
-                  SizedBox(width: 20.0),
-                  new RaisedButton(onPressed: (){
-                    DatePicker.showDatePicker(context,
-                        showTitleActions: true,
-                        minTime: DateTime(1800, 1, 1),
-                        maxTime: DateTime(3000, 12, 31),
-                        onConfirm: (date) {
-                          setState(() {
-                            _todayDate = date;
-                          });},
-                        currentTime: _todayDate, locale: LocaleType.ru);
-                  }, child: Text("Выбрать дату"),
-                  ),
-                ],
-                ),
+            Row(children: <Widget>[
+              Text(user.date.toString()),
+              SizedBox(width: 20.0),
+              new RaisedButton(onPressed: (){
+                DatePicker.showDatePicker(context,
+                    showTitleActions: true,
+                    minTime: DateTime(1800, 1, 1),
+                    maxTime: DateTime(3000, 12, 31),
+                    onConfirm: (date) {
+                      setState(() {
+                        _todayDate = date;
+                      });},
+                    currentTime: _todayDate, locale: LocaleType.ru);
+              }, child: Text("Выбрать дату"),
+              ),
+            ],
+            ),
             new SizedBox(height: 20.0),
             new RaisedButton(onPressed: (){
               _formKey.currentState.save();

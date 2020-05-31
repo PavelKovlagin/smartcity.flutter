@@ -267,7 +267,7 @@ class FormEventState extends State<FormEvent> {
             
             textColor: Colors.white,
             onPressed: (){
-              print("Хочу авторизоваться");
+              Navigator.pushNamed(context,'/auth');
             }, 
           )
         )
