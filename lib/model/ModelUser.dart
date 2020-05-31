@@ -1,14 +1,16 @@
+import 'package:smart_city/model/ModelEvent.dart';
 
 class ModelUser {
 
   int _user_id;
-  String _user_name;
-  String _surname;
-  String _subname;
+  String _user_name = "asd";
+  String _surname = "asd";
+  String _subname = "asd";
   DateTime _date;
   String _email;
   DateTime _blockDate;
   bool _blocked;
+  List<ModelEvent> _events;
 
   ModelUser.empty(){
     _user_id = 0;
@@ -18,6 +20,7 @@ class ModelUser {
     _email = "";
     _blockDate = DateTime.parse('0000-01-01');
     _blocked = false;
+    _events = new List<ModelEvent>();
   }
 
   ModelUser(int user_id, 
@@ -27,7 +30,8 @@ class ModelUser {
             DateTime date,
             String email,
             DateTime blockDate,
-            bool blocked) {
+            bool blocked,
+            List<ModelEvent> events) {
     _user_id = user_id;
     _user_name = user_name;
     _surname = surname;
@@ -36,11 +40,15 @@ class ModelUser {
     _email = email;
     _blockDate = blockDate;
     _blocked = blocked;
+    _events = events;
   }
 
   factory ModelUser.fromJson(Map<String, dynamic> json){
     DateTime date;
-    print(json["date"]);
+    String user_name, surname, subname;
+    if (json['user']['user_name'] == null) user_name = ""; else user_name = json['user']['user_name'];
+    if (json['user']['surname'] == null) surname = ""; else surname = json['user']['surname'];
+    if (json['user']['subname'] == null) subname = ""; else subname = json['user']['subname'];
     if (json["date"] == null) {
       date = DateTime.now();      
     } else {
@@ -48,14 +56,15 @@ class ModelUser {
     }
     print(date);
     return ModelUser(
-      json['user_id'] as int,
-      json['user_name'] as String,
-      json['surname'] as String,
-      json['subname'] as String,
+      json['user']['user_id'] as int,
+      user_name,
+      surname,
+      subname,
       date,
-      json['email'] as String,
-      DateTime.parse(json['blockDate']),
-      json['blocked'] as bool
+      json['user']['email'] as String,
+      DateTime.parse(json['user']['blockDate']),
+      json['user']['blocked'] as bool,
+      json['events'].map<ModelEvent>((json)=>ModelEvent.fromJson(json)).toList(),
     );
   }
 
@@ -67,6 +76,7 @@ class ModelUser {
   String get email => _email;
   DateTime get blockDate =>  _blockDate;
   bool get blocked => _blocked;
+  List<ModelEvent> get events => _events;
 
   set user_id(int value) {
     _user_id = value;

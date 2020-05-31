@@ -117,7 +117,7 @@ class FormEventState extends State<FormEvent> {
               maxLines: null,
               ),
               Text("Статус события: " + event.statusName),
-              Text("Пользователь: " + event.email),
+              InkWell(child: Text("Пользователь: " + event.email), onTap: () => Navigator.pushNamed(context, "/profile/" + event.user_id))
             ],
           )
         )
@@ -132,7 +132,14 @@ class FormEventState extends State<FormEvent> {
             Text("Название события: " + event.eventName),
             Text("Описание события: " + event.eventDescription),
             Text("Статус события: " + event.statusName),
-            Text("Пользователь: " + event.email),
+            Row(
+              children: <Widget>[
+                Text("Пользователь: "), 
+                InkWell(child: Text(event.email, style: TextStyle(color: Colors.blue)), 
+                  onTap: () => Navigator.pushNamed(context, "/profile/" + event.user_id.toString())
+                )
+              ]
+            ), 
             Text("Широта: " + event.latitude.toString()),
             Text("Долгота: " + event.longitude.toString()),
             ],

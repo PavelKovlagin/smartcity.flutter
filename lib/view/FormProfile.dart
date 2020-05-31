@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_city/RestApi.dart';
+import 'package:smart_city/model/ModelEvent.dart';
 import 'package:smart_city/model/ModelUser.dart';
 
 class FormProfile extends StatefulWidget{
@@ -75,30 +76,37 @@ class FormProfileState extends State<FormProfile> {
   }
 
   _getUserInformationWidget(){
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Builder(builder: (value){
-            if (_user.blocked) {
-              return Text("Пользователь заблокирован до " + _user.stringBlockDate(), style: _errorTextStyle);
-            } else {
-              return Text("Пользователь не заблокирован", style: _successTextStype); 
-            }          
-          },
+    return Column(
+    children: <Widget>[
+        Expanded(
+        child: SingleChildScrollView (
+          child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Builder(builder: (value){
+                if (_user.blocked) {
+                  return Text("Пользователь заблокирован до " + _user.stringBlockDate(), style: _errorTextStyle);
+                } else {
+                  return Text("Пользователь не заблокирован", style: _successTextStype); 
+                }          
+              },
+              ),
+              Text("Фамилия: " + _user.surname, style: _usualTextStyle),
+              Text("Имя: " + _user.user_name, style: _usualTextStyle),
+              Text("Отчество: " + _user.subname, style: _usualTextStyle),
+              Text("Дата рождения: " + _user.stringDate(), style: _usualTextStyle),
+              Text("Email: " + _user.email, style: _usualTextStyle),
+            ],
           ),
-          Text("Фамилия: " + _user.surname, style: _usualTextStyle),
-          Text("Имя: " + _user.user_name, style: _usualTextStyle),
-          Text("Отчество: " + _user.subname, style: _usualTextStyle),
-          Text("Дата рождения: " + _user.stringDate(), style: _usualTextStyle),
-          Text("Email: " + _user.email, style: _usualTextStyle),
-        ],
+        ),
       ),
-    );
+        _getListEvent()
+    ],
+    ) ;
   }
 
   _getFutureBuilderProfileWidget(String token){
-    return SingleChildScrollView(
+    return Container(
       child: Builder(
         builder: (value){
           if (token != "null"){
@@ -218,6 +226,7 @@ class FormProfileState extends State<FormProfile> {
       future: RestApi.getUserResponse(_user_id),
       builder: (context, snapshot) {
         if (snapshot.hasData ) {
+          print(snapshot.data["data"]);
           if (snapshot.data["success"]) {
             _user = ModelUser.fromJson(snapshot.data["data"]);
             return _getUserInformationWidget();
@@ -233,96 +242,123 @@ class FormProfileState extends State<FormProfile> {
   }
 
   _getProfileInformationWidget(){
-    return Expanded(
-        child: Form(
-          key: _formKey,
-          child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Builder(builder: (value){            
-              if (_user.blocked) {
-                return Text("Пользователь заблокирован до " + _user.stringBlockDate(), style: _errorTextStyle);
-              } else {
-                return Text("Пользователь не заблокирован", style: _successTextStype); 
-              }          
-            },
-            ),
-            TextFormField(
-              onSaved: (value){
-                _user.surname = value;
-              },
-              initialValue: _user.surname,
-              decoration: InputDecoration(labelText: "Фамилия"),
-              maxLines: 1,
-            ),
-            TextFormField(
-              onSaved: (value){
-                _user.user_name = value;
-              },
-              initialValue: _user.user_name,
-              decoration: InputDecoration(labelText: "Имя"),
-              maxLines: 1,
-            ),
-            TextFormField(
-              onSaved: (value){
-                _user.subname = value;
-              },
-              initialValue: _user.subname,
-              decoration: InputDecoration(labelText: "Отчество"),
-              maxLines: 1,
-            ),
-            Row(children: <Widget>[
-              
-              Text("Дата рождения: ", style: _usualTextStyle),
-
-              new RaisedButton(onPressed: (){
-                DatePicker.showDatePicker(context,
-                    showTitleActions: true,
-                    minTime: DateTime(1800, 1, 1),
-                    maxTime: DateTime(3000, 12, 31),
-
-                    onConfirm: (date) {
-                    setState(() {
-                      _user.date = date; 
-                      print("SETSTATE DATE: " + _user.toString());
-                    });                                                              
-                                                         
-                    },
-                    currentTime: _user.date,
-                    locale: LocaleType.ru);
-              }, child: Text(_user.stringDate()),
-              ),
-            ],
-            ),
-            Text("Email: " + _user.email, style: _usualTextStyle),
-            RaisedButton(
-              child: Text("Редактировать"),
-              color: Colors.blue,
-              textColor: Colors.white,
-              onPressed: (){
-                _formKey.currentState.save();
-                    if (_formKey.currentState.validate())
-                      return showDialog(
-                          context: context, 
-                          builder: (BuildContext context) {
-                            
-                        return AlertDialog(title: Text("Проверка"), content: Text(_user.toString()),
-                        );
-                      });                     
+    return Container(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Expanded(
+            flex: 2,
+            child: SingleChildScrollView(
+              child: Form(
+              key: _formKey,
+                child: Column(
+                  children: <Widget>[
+                  Container(
+                  alignment: Alignment.topRight,
+                    child: RaisedButton(
+                      child: Text("Выйти из профиля"),
+                      color: Colors.blue,
+                      textColor: Colors.white,
+                      onPressed: (){
+                        _logout();                                       
+                      },
+                    ),
+                  ),
+                  Builder(builder: (value){            
+                    if (_user.blocked) {
+                      return Text("Пользователь заблокирован до " + _user.stringBlockDate(), style: _errorTextStyle);
+                    } else {
+                      return Text("Пользователь не заблокирован", style: _successTextStype); 
+                    }          
                   },
-            ),
-            RaisedButton(
-              child: Text("Выйти"),
-              color: Colors.blue,
-              textColor: Colors.white,
-              onPressed: (){
-                _logout();                                       
-              },
-            )
-          ],
-        ),
-        ),
-      );
+                  ),
+                  TextFormField(
+                    onSaved: (value){
+                      _user.surname = value;
+                    },
+                    initialValue: _user.surname,
+                    decoration: InputDecoration(labelText: "Фамилия"),
+                    maxLines: 1,
+                  ),
+                  TextFormField(
+                    onSaved: (value){
+                      _user.user_name = value;
+                    },
+                    initialValue: _user.user_name,
+                    decoration: InputDecoration(labelText: "Имя"),
+                    maxLines: 1,
+                  ),
+                  TextFormField(
+                    onSaved: (value){
+                      _user.subname = value;
+                    },
+                    initialValue: _user.subname,
+                    decoration: InputDecoration(labelText: "Отчество"),
+                    maxLines: 1,
+                  ),
+                  Row(children: <Widget>[                  
+                    Text("Дата рождения: ", style: _usualTextStyle),
+                    new RaisedButton(onPressed: (){
+                      DatePicker.showDatePicker(context,
+                          showTitleActions: true,
+                          minTime: DateTime(1800, 1, 1),
+                          maxTime: DateTime(3000, 12, 31),
+                          onConfirm: (date) {
+                            setState(() {
+                              _user.date = date; 
+                              print("SETSTATE DATE: " + _user.toString());
+                            });
+                          },
+                          currentTime: _user.date,
+                          locale: LocaleType.ru);
+                    }, child: Text(_user.stringDate()),
+                    ),
+                  ],
+                  ),
+                  Text("Email: " + _user.email, style: _usualTextStyle),
+                  RaisedButton(
+                    child: Text("Редактировать"),
+                    color: Colors.blue,
+                    textColor: Colors.white,
+                    onPressed: (){
+                      _formKey.currentState.save();
+                      if (_formKey.currentState.validate())
+                        return showDialog(
+                          context: context, 
+                          builder: (BuildContext context) {                            
+                            return AlertDialog(title: Text("Проверка"), content: Text(_user.toString()));
+                          }
+                        );                     
+                    },
+                  ),
+                  ],
+                ),
+              )
+          ),
+          ),
+          _getListEvent()
+        ],
+      ),
+    );
+  }
+
+  _getListEvent(){
+    return Expanded(
+      flex: 1,
+      child: ListView.builder(                        
+      itemCount: _user.events.length,
+        itemBuilder: (context, index) {
+          final event = _user.events[index];
+          return Card(
+            child: ListTile(
+                  title: Text(event.eventName), 
+                  subtitle: Text(event.eventDescription),
+                  onTap: () => Navigator.pushNamed(context, '/event/' + event.event_id.toString()),
+                ),
+          );
+        }
+      ),
+    );
   }
 
   @override
@@ -340,7 +376,6 @@ class FormProfileState extends State<FormProfile> {
                 future: _getToken(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
-
                     return _getFutureBuilderProfileWidget(snapshot.data);
                   } else {
                     return Center(
@@ -354,8 +389,7 @@ class FormProfileState extends State<FormProfile> {
             }
           },
         ),
-        )
-
+      )
     );
   }
 }
