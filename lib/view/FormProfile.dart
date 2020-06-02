@@ -353,7 +353,7 @@ class FormProfileState extends State<FormProfile> {
             child: ListTile(
                   title: Text(event.eventName), 
                   subtitle: Text(event.eventDescription),
-                  onTap: () => Navigator.pushNamed(context, '/event/' + event.event_id.toString()),
+                  onTap: () => Navigator.pushNamed(context, '/event/' + event.id.toString()),
                 ),
           );
         }

@@ -165,7 +165,7 @@ class FormEventState extends State<FormEvent> {
                   ListTile(
                     title: InkWell(
                       child: Text(
-                        comment.email + " " + comment.date), 
+                        comment.email + " " + comment.date.toString()), 
                         onTap: () {
                           Navigator.pushNamed(context,'/profile/' + comment.user_id.toString()); 
                         },
@@ -274,7 +274,7 @@ class FormEventState extends State<FormEvent> {
             
             textColor: Colors.white,
             onPressed: (){
-              Navigator.pushNamed(context,'/auth');
+              Navigator.pushNamed(context,'/profile');
             }, 
           )
         )
@@ -315,98 +315,6 @@ class FormEventState extends State<FormEvent> {
                   ),
                 );
                 }               
-              } else {
-                return Center(
-                  child: CircularProgressIndicator());
-              }
-            },
-          ),
-      ),
-    );
-  }
-}
-
-class FormEventStateNonEdit extends State<FormEvent> {
-
-  FormEventStateNonEdit(String event_id){
-    this._event_id = event_id;
-  }
-
-  String _event_id;
-
-  final _formKey = GlobalKey<FormState>();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Просмотр события")),
-      body: Container(
-        child: FutureBuilder(
-            future: RestApi.getEventResponse(_event_id.toString()),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                ModelEvent event = ModelEvent.fromJson(snapshot.data["data"]["event"]);
-                List<ModelComment> comments = snapshot.data["data"]["comments"].map<ModelComment>((json)=>ModelComment.fromJson(json)).toList();
-                List<ModelImage> images = snapshot.data["data"]["event"]["eventImages"].map<ModelImage>((json)=>ModelImage.fromJson(json)).toList();
-                for (ModelComment comment in comments){
-                  for (ModelImage commentImage in comment.commentImages){
-                    print(commentImage.image_name);
-                  }
-                }
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[  
-                    
-                    Expanded(
-                      child: Container(                                     
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: images.length,
-                          itemBuilder: (context, index) {
-                          final image = images[index];
-                            return  Container(
-                              child: Image.network(RestApi.server + "/storage/" + image.image_name)
-                            );
-                          }
-                        )
-                      )
-                    ),  
-                    Expanded(
-                      child: Container(
-                      height: 200,
-                        child: ListView.builder(                        
-                        itemCount: comments.length,
-                          itemBuilder: (context, index) {
-                            final comment = comments[index];
-                            return Card(
-                              child: Column (
-                                children: <Widget>[
-                                  ListTile(
-                                    title: Text(comment.email + " " + comment.date),
-                                    subtitle: Text(comment.text),
-                                  ),
-                                  new Container(                    
-                                    height: 50.0,                 
-                                    child: ListView.builder(
-                                      scrollDirection: Axis.horizontal,
-                                      itemCount: comment.commentImages.length,
-                                      itemBuilder: (context, index) {
-                                      final commentImage = comment.commentImages[index];
-                                        return  Container(
-                                          child: Image.network("http://95.66.217.238:777//storage/" + commentImage.image_name)
-                                        );
-                                      }
-                                    )
-                                  )
-                                ],
-                              )
-                            );
-                          }
-                        )
-                      ),
-                    ),
-                  ],
-                );
               } else {
                 return Center(
                   child: CircularProgressIndicator());

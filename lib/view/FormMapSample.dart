@@ -6,8 +6,11 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong/latlong.dart';
+import 'package:smart_city/DBprovider.dart';
 import 'package:smart_city/RestApi.dart';
+import 'package:smart_city/model/ModelCategory.dart';
 import 'package:smart_city/model/ModelEvent.dart';
+import 'package:smart_city/model/ModelStatus.dart';
 
 class FormMapSample extends StatefulWidget {
   @override
@@ -19,6 +22,9 @@ class FormMapSample extends StatefulWidget {
 class FormMapSampleState extends State<FormMapSample> {
   Geolocator _geolocator;
   Position _position;
+
+  String currentStatus = "Все";
+  String currentCategory = "Все";
 
   double _userLatitude =  56.146405, _userLongitude = 40.379389; //Владимир
   //double _userLatitude =  55.753076, _userLongitude = 37.667272; //Москва
@@ -52,22 +58,14 @@ class FormMapSampleState extends State<FormMapSample> {
   );
 }
 
-  List<Marker> eventMarkers = new List<Marker>();
-
   Future _getEvents() async {
     var events = await RestApi.getEventsResponse("2000-05-26 11:11:11");
     return events;
   }
-
-  Future _getEvent(String event_id) async {
-    var event = await RestApi.getEventResponse(event_id);
-    return event;
-  }
   
-  addMarkers(List<ModelEvent> events) {   
-    eventMarkers = new List<Marker>(); 
+  Future<List<Marker>> _addMarkers(List<ModelEvent> events) async {   
+    List<Marker> eventMarkers = new List<Marker>(); 
     for (var event in events) {
-      if (event.visibilityForUser == 1) {
         eventMarkers.add(new Marker(
             point: new LatLng(event.latitude, event.longitude),
             width: 40,
@@ -84,18 +82,8 @@ class FormMapSampleState extends State<FormMapSample> {
                           content: Text(event.eventDescription),
                           actions: <Widget>[
                             RaisedButton(
-                              onPressed: () {
-                                // Future future = _getEvent(event.event_id.toString());
-                                // future.then((content){
-                                //   if (content["success"]){
-                                //     print(content["success"]);
-                                //     print(content["data"]);
-                                //     Event event = Event.fromJson(content["data"]["event"]);
-                                //     print(event.eventName); 
-                                //   } else {
-                                //     _showMyDialog(content["message"].toString());
-                                //   }             
-                                Navigator.pushNamed(context, "/event/" + event.event_id.toString());
+                              onPressed: () {            
+                                Navigator.pushNamed(context, "/event/" + event.id.toString());
                               },
                               child: Text("Открыть"),
                             )
@@ -103,13 +91,13 @@ class FormMapSampleState extends State<FormMapSample> {
                         );
                       });
                 })));
-      }
     }
+    return eventMarkers;
   }
 
   void checkPermission() {
     _geolocator.checkGeolocationPermissionStatus().then((status) {
-      print('status: $status');
+      print('status: $status');     
     });
     _geolocator
         .checkGeolocationPermissionStatus(
@@ -122,23 +110,37 @@ class FormMapSampleState extends State<FormMapSample> {
       ..then((status) {
         print('whenInUse status: $status');
       });
+    }
+
+  void _selectEventsFromDB(){
+    Future<List<ModelEvent>> future = DBprovider.db.selectEvents("", "");
+      future.then((value){        
+        List<ModelEvent> events = value;
+        setState(() {
+          //addMarkers(events);
+        });        
+      });
   }
 
   @override
   void initState() {
     super.initState();
-    _geolocator = Geolocator();
-    LocationOptions locationOptions =
-        LocationOptions(accuracy: LocationAccuracy.high, distanceFilter: 1);
-    checkPermission();
-    updateLocation();
-    StreamSubscription positionStream = _geolocator
-        .getPositionStream(locationOptions)
-        .listen((Position position) {
-      setState(() {
-        _position = position;
+    try{
+      _geolocator = Geolocator();
+      checkPermission();
+      updateLocation();
+      LocationOptions locationOptions =
+      LocationOptions(accuracy: LocationAccuracy.high, distanceFilter: 1);      
+      StreamSubscription positionStream = _geolocator
+          .getPositionStream(locationOptions)
+          .listen((Position position) {
+        setState(() {
+          _position = position;
+        });
       });
-    });
+    } catch (Exception) {
+
+    }
   }
 
   void updateLocation() async {
@@ -152,6 +154,173 @@ class FormMapSampleState extends State<FormMapSample> {
     } catch (e) {
       print('Error: ${e.toString()}');
     }
+  }
+
+  _dropLists(){
+    return Expanded(
+      flex: 1,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+        children: <Widget>[
+          FutureBuilder(
+            future: RestApi.getStatuses(),
+            builder: (context, snapshot){
+              if (snapshot.hasData){
+                if (snapshot.data["success"]){
+                  List<ModelStatus> statuses = snapshot.data["data"].map<ModelStatus>((json)=>ModelStatus.fromJson(json)).toList();
+                  statuses.add(ModelStatus(0, "Все", "Все статусы")); 
+                  print(statuses.length);             
+                  return DropdownButton(
+                    value: currentStatus,
+                    onChanged: (String newValue) {
+                      setState(() {
+                        currentStatus = newValue;
+                      });
+                    },
+                    hint: Text("Статус"),
+                    items: statuses.map<DropdownMenuItem<String>>((ModelStatus value) {
+                      return DropdownMenuItem<String>(
+                        value: value.statusName,
+                        child: Text(value.statusName),
+                      );}).toList(),
+                  );
+                } else {
+                  return Text(snapshot.data["message"]);
+                  
+                }            
+              } else {
+                return CircularProgressIndicator();
+              }
+            },
+          ),
+          FutureBuilder(
+            future: RestApi.getCategories(),
+            builder: (context, snapshot){
+              if (snapshot.hasData){
+                if (snapshot.data["success"]){
+                  List<ModelCategory> categories = snapshot.data["data"].map<ModelCategory>((json)=>ModelCategory.fromJson(json)).toList();
+                  categories.add(ModelCategory(0, "Все", "Все категории")); 
+                  print(categories.length);             
+                  return DropdownButton(
+                    value: currentCategory,
+                    onChanged: (String newValue) {
+                      setState(() {
+                        currentCategory = newValue;
+                      });
+                    },
+                    hint: Text("Категория"),
+                    items: categories.map<DropdownMenuItem<String>>((ModelCategory value) {
+                      return DropdownMenuItem<String>(
+                        value: value.categoryName,
+                        child: Text(value.categoryName),
+                      );}).toList(),
+                  );
+                } else {
+                  return Text(snapshot.data["message"]);
+                  
+                }            
+              } else {
+                return CircularProgressIndicator();
+              }
+            },
+          ),
+        ],
+      ),
+      )
+    );
+  }
+
+  _map(){
+    return Expanded(
+      flex: 7,
+      child: FutureBuilder(
+      future: DBprovider.db.selectEvents(currentCategory, currentStatus),
+      builder: (context, snapshot) {        
+        if (snapshot.hasData){
+          return FutureBuilder(
+            future: _addMarkers(snapshot.data),
+            builder: (context, snapshot){
+            if (snapshot.hasData){              
+              return FlutterMap(
+                  options: MapOptions(
+                    center: LatLng(_userLatitude, _userLongitude),
+                    zoom: _zoom,
+                    minZoom: 8,
+                    maxZoom: 18,
+                    plugins: [
+                      MarkerClusterPlugin(),
+                    ],
+                  ),
+                  layers: [
+                    new TileLayerOptions(
+                      urlTemplate:
+                          "http://tiles.maps.sputnik.ru/{z}/{x}/{y}.png",
+                    ),
+                    MarkerClusterLayerOptions(
+                      maxClusterRadius: 120,
+                      fitBoundsOptions: FitBoundsOptions(
+                        padding: EdgeInsets.all(50),
+                      ),
+                      markers: snapshot.data,
+                      polygonOptions: PolygonOptions(
+                          borderColor: Colors.blueAccent,
+                          color: Colors.black12,
+                          borderStrokeWidth: 3),
+                      builder: (context, markers) {
+                        return new FloatingActionButton(
+                          child: Text(markers.length.toString()),
+                          onPressed: null,
+                        );
+                      },
+                    ),
+                    MarkerClusterLayerOptions(
+                        markers: userPosition,
+                        builder: (context, userPosition) {}),
+                  ],
+                );
+            } else {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+            },
+          );
+        } else {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+      }
+    ),
+    );
+  }
+
+  _panel(){
+    return Expanded(
+      flex: 2,
+      child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        new IconButton(
+          onPressed: () {
+              Navigator.pushNamed(context,
+                  '/addEvent/${_position.longitude.toString()}/${_position.latitude.toString()}');
+          },
+          iconSize: 80 ,
+          icon: Icon(Icons.add_circle),
+          color: Colors.blue,
+        ),
+        new IconButton(
+            onPressed: () {                                                  
+              
+            },
+            iconSize: 80,
+            icon: Icon(Icons.center_focus_strong),
+            color: Colors.blue)
+      ],
+    ),
+    );
   }
 
   List<Marker> userPosition;
@@ -181,92 +350,31 @@ class FormMapSampleState extends State<FormMapSample> {
           IconButton(
             icon: Icon(Icons.update),
             onPressed: () {
-              // print(
-              //     'Latitude: ${_position != null ? _position.latitude.toString() : '0'},');
-              // print(
-              //     'Longitude: ${_position != null ? _position.longitude.toString() : '0'}, ');
+                Future future = _getEvents();
+                future.then((content){
+                  if (content["success"]){                    
+                    setState(() {
+                      print(content["success"]);
+                      print(content["data"]);
+                      List<ModelEvent>events = content["data"].map<ModelEvent>((json)=>ModelEvent.fromJson(json)).toList();
+                      DBprovider.db.setEvents(events);                      
+                    });
+                  } else {
+                    _showMyDialog(content["message"].toString());
+                  }
+                setState(() {
+                  _selectEventsFromDB();
+                });
+              });
             },
           )
         ],
       ),
       body: Column(
-        children: <Widget>[
-          new Expanded(
-                  child: new FlutterMap(
-                    options: MapOptions(
-                      center: LatLng(_userLatitude, _userLongitude),
-                      zoom: _zoom,
-                      minZoom: 8,
-                      maxZoom: 18,
-                      plugins: [
-                        MarkerClusterPlugin(),
-                      ],
-                    ),
-                    layers: [
-                      new TileLayerOptions(
-                        urlTemplate:
-                            "http://tiles.maps.sputnik.ru/{z}/{x}/{y}.png",
-                      ),
-                      MarkerClusterLayerOptions(
-                        maxClusterRadius: 120,
-                        fitBoundsOptions: FitBoundsOptions(
-                          padding: EdgeInsets.all(50),
-                        ),
-                        markers: eventMarkers,
-                        polygonOptions: PolygonOptions(
-                            borderColor: Colors.blueAccent,
-                            color: Colors.black12,
-                            borderStrokeWidth: 3),
-                        builder: (context, markers) {
-                          return new FloatingActionButton(
-                            child: Text(markers.length.toString()),
-                            onPressed: null,
-                          );
-                        },
-                      ),
-                      MarkerClusterLayerOptions(
-                          markers: userPosition,
-                          builder: (context, userPosition) {}),
-                    ],
-                  ),
-                ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              new IconButton(
-                onPressed: () {
-                   Navigator.pushNamed(context,
-                       '/addEvent/${_position.longitude.toString()}/${_position.latitude.toString()}');
-                },
-                iconSize: 80 ,
-                icon: Icon(Icons.add_circle),
-                color: Colors.blue,
-              ),
-              new IconButton(
-                  onPressed: () {                                                  
-                    setState(() {
-                      Future future = _getEvents();
-                      future.then((content){
-                        if (content["success"]){
-                          
-                          setState(() {
-                            print(content["success"]);
-                          print(content["data"]);
-                          List<ModelEvent>events = content["data"].map<ModelEvent>((json)=>ModelEvent.fromJson(json)).toList();
-                          addMarkers(events);
-                          });
-                        } else {
-                          _showMyDialog(content["message"].toString());
-                        }                     
-                        
-                      }); 
-                    });
-                  },
-                  iconSize: 80,
-                  icon: Icon(Icons.center_focus_strong),
-                  color: Colors.blue)
-            ],
-          )
+        children: <Widget>[          
+          _dropLists(),
+          _map(),          
+          _panel(),
         ],
       ),
     );

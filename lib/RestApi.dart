@@ -168,55 +168,37 @@ class RestApi {
      print("false load");
    }
     return events;
-
-
-    //response
-    
-    // if (res.statusCode == 200) {
-    //   // If the server did return a 200 OK response, then parse the JSON.
-    //   var data = json.decode(res.body);
-    //   var rest = data["data"] as List;
-    //   print(rest);
-    //   events = rest.map<Event>((json)=>Event.fromJson(json)).toList();
-    //   print("List Size: ${events.length}");      
-    // } 
-          
   }
 
-  static Future<List<ModelEvent>> getEvent(String event_id) async {
-    List<ModelEvent> events;
-    String link = server +'event?event_id=' + event_id;
-    var res =
-        await http.get(Uri.encodeFull(link));
-        print(res.body);
-    if (res.statusCode == 200) {
-
-      // If the server did return a 200 OK response, then parse the JSON.
-      var data = json.decode(res.body);
-      var rest = data as List;
-      print(rest);
-      events = rest.map<ModelEvent>((json)=>ModelEvent.fromJson(json)).toList();
-      print("List Size: ${events.length}");
-    }     
-    return events;
+  static Future getStatuses() async{
+    try{
+      Map<String, String> accept = {
+        "Accept": "application/json"
+      };
+      var res = await http.get(server + "/api/statuses", headers: accept);
+      print("..." + res.body);
+      if (res.statusCode == 200 || res.statusCode == 418) return json.decode(res.body);
+      if (res.statusCode == 401) return _currentResponse(false, "[]", "Unauthenticated");
+      if (res.statusCode == 429) return _currentResponse(false, "[]", "Too Many Requests");
+      return _currentResponse(false, "[]", "Error load");
+    } catch (Exception){      
+     return _currentResponse(false, "[]", "Error load");
+   }  
   }
 
-  static Future<List<ModelComment>> getComments(String event_id) async {
-    List<ModelComment> comments;
-    String link = server + 'eventComments?event_id=' + event_id;
-    var res =
-        await http.get(Uri.encodeFull(link));
-        print(res.body);
-    if (res.statusCode == 200) {
-
-      // If the server did return a 200 OK response, then parse the JSON.
-      var data = json.decode(res.body);
-      var rest = data as List;
-      print(rest);
-      comments = rest.map<ModelComment>((json)=>ModelComment.fromJson(json)).toList();
-      print("List Size: ${comments.length}");
-    } 
-    
-    return comments;
+  static Future getCategories() async{
+    try{
+      Map<String, String> accept = {
+        "Accept": "application/json"
+      };
+      var res = await http.get(server + "/api/categories", headers: accept);
+      print("..." + res.body);
+      if (res.statusCode == 200 || res.statusCode == 418) return json.decode(res.body);
+      if (res.statusCode == 401) return _currentResponse(false, "[]", "Unauthenticated");
+      if (res.statusCode == 429) return _currentResponse(false, "[]", "Too Many Requests");
+      return _currentResponse(false, "[]", "Error load");
+    } catch (Exception){      
+     return _currentResponse(false, "[]", "Error load");
+   }  
   }
 }
