@@ -49,10 +49,10 @@ class ModelUser {
     if (json['user']['user_name'] == null) user_name = ""; else user_name = json['user']['user_name'];
     if (json['user']['surname'] == null) surname = ""; else surname = json['user']['surname'];
     if (json['user']['subname'] == null) subname = ""; else subname = json['user']['subname'];
-    if (json["date"] == null) {
+    if (json['user']["date"] == null) {
       date = DateTime.now();      
     } else {
-      date = DateTime.parse(json['date']);      
+      date = DateTime.parse(json['user']["date"]);      
     }
     print(date);
     return ModelUser(

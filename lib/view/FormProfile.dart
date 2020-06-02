@@ -58,7 +58,6 @@ class FormProfileState extends State<FormProfile> {
   Future<String> _getToken() async{
     SharedPreferences preferences = await SharedPreferences.getInstance();
     if (preferences.getString("token") == null) {
-      print("TOKEN NOT EXISTS");
       return "null";
     } else {
       return preferences.getString("token");
@@ -179,6 +178,7 @@ class FormProfileState extends State<FormProfile> {
                   keyboardType: TextInputType.visiblePassword,
                   obscureText: true,
                 ),
+                SizedBox(height: 35),
                 new RaisedButton(                  
                   onPressed: (){
                     _formKey.currentState.save();
@@ -199,7 +199,6 @@ class FormProfileState extends State<FormProfile> {
                             _setToken(value["data"]);                            
                           });
                         }
-                        print(value["message"]);
                       }); 
                     });                  
                     
@@ -208,11 +207,19 @@ class FormProfileState extends State<FormProfile> {
                   color: Colors.blue,
                   textColor: Colors.white,
                 ),
+                SizedBox(height: 35),
                 InkWell(
                   onTap: (){
-                    print("Зарегистрироваться");
+                    Navigator.pushNamed(context, '/register');
                   },
-                  child: Text("Зарегистрироваться"),
+                  child: Text("Зарегистрироваться", style: TextStyle(color: Colors.blue)),
+                ),
+                SizedBox(height: 35),
+                InkWell(
+                  onTap: (){
+                    Navigator.pushNamed(context, '/sendCode');
+                  },
+                  child: Text("Забыли пароль? Ну вы и лох, ладно, жмите сюда", style: TextStyle(color: Colors.blue)),
                 )
               ],
             ),
@@ -226,7 +233,6 @@ class FormProfileState extends State<FormProfile> {
       future: RestApi.getUserResponse(_user_id),
       builder: (context, snapshot) {
         if (snapshot.hasData ) {
-          print(snapshot.data["data"]);
           if (snapshot.data["success"]) {
             _user = ModelUser.fromJson(snapshot.data["data"]);
             return _getUserInformationWidget();
@@ -252,6 +258,7 @@ class FormProfileState extends State<FormProfile> {
               child: Form(
               key: _formKey,
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                   Container(
                   alignment: Alignment.topRight,
@@ -264,7 +271,8 @@ class FormProfileState extends State<FormProfile> {
                       },
                     ),
                   ),
-                  Builder(builder: (value){            
+                  
+                  Builder(builder: (value){           
                     if (_user.blocked) {
                       return Text("Пользователь заблокирован до " + _user.stringBlockDate(), style: _errorTextStyle);
                     } else {
@@ -272,6 +280,7 @@ class FormProfileState extends State<FormProfile> {
                     }          
                   },
                   ),
+                  Text("Email: " + _user.email, style: _usualTextStyle),
                   TextFormField(
                     onSaved: (value){
                       _user.surname = value;
@@ -306,7 +315,6 @@ class FormProfileState extends State<FormProfile> {
                           onConfirm: (date) {
                             setState(() {
                               _user.date = date; 
-                              print("SETSTATE DATE: " + _user.toString());
                             });
                           },
                           currentTime: _user.date,
@@ -314,21 +322,27 @@ class FormProfileState extends State<FormProfile> {
                     }, child: Text(_user.stringDate()),
                     ),
                   ],
-                  ),
-                  Text("Email: " + _user.email, style: _usualTextStyle),
+                  ),                  
                   RaisedButton(
                     child: Text("Редактировать"),
                     color: Colors.blue,
                     textColor: Colors.white,
                     onPressed: (){
                       _formKey.currentState.save();
-                      if (_formKey.currentState.validate())
-                        return showDialog(
-                          context: context, 
-                          builder: (BuildContext context) {                            
-                            return AlertDialog(title: Text("Проверка"), content: Text(_user.toString()));
-                          }
-                        );                     
+                      if (_formKey.currentState.validate()){
+                        Future future = _getToken();
+                        future.then((value){
+                          Future future = RestApi.updateUser(value, _user.user_id, _user.surname, _user.user_name, _user.subname, _user.date);
+                          future.then((value){
+                            return showDialog(
+                                context: context, 
+                                builder: (BuildContext context) {                          
+                              return AlertDialog(title: Text("Отчет"), content: Text(value["message"]),
+                              );
+                            });
+                          });
+                        });                                                      
+                      }                    
                     },
                   ),
                   ],

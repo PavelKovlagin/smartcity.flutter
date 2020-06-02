@@ -1,8 +1,8 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:smart_city/view/FormAddEvent.dart';
+import 'package:smart_city/view/FormChangePassword.dart';
 import 'package:smart_city/view/FormEvent.dart';
+import 'package:smart_city/view/FormSendCode.dart';
 
 import 'view/FormMapSample.dart';
 import 'view/FormProfile.dart';
@@ -17,6 +17,7 @@ void main() {
         '/register': (BuildContext context) => FormRegister(),
         '/event': (BuildContext context) => FormEvent.def(),
         '/profile': (BuildContext context) => FormProfile(),
+        '/sendCode': (BuildContext context) => FormSendCode()
       },
       onGenerateRoute: (routeSettings) {
         var path = routeSettings.name.split('/');
@@ -39,6 +40,13 @@ void main() {
             settings: routeSettings,
           );
           break;
+          case 'changePassword':
+          return new MaterialPageRoute(
+            builder: (context) => new FormChangePassword(path[2]),
+            settings: routeSettings,
+          );
+          break;
+
         }
       }));
 }

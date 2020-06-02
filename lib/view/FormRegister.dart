@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:smart_city/RestApi.dart';
 import 'package:smart_city/model/ModelUser.dart';
 
 class FormRegister extends StatefulWidget {
@@ -14,13 +15,14 @@ class FormRegisterState extends State<FormRegister> {
 
   final _formKey = GlobalKey<FormState>();
   var _todayDate = new DateTime.now();
-  String password = "";
+  String _password = "";
+  String _c_password ="";
+  
 
   @override
   Widget build(BuildContext context) {
-    user.date = _todayDate;
+    user.date = _todayDate;    
     return Scaffold(
-      //resizeToAvoidBottomPadding: false,
       appBar: AppBar(
         title: Text("Регистрация")),
         body: SingleChildScrollView(
@@ -31,7 +33,6 @@ class FormRegisterState extends State<FormRegister> {
                 new TextFormField(validator: (value){
                   if (value.isEmpty) return "Введите email";
                 },
-                  initialValue: "someEmail@mail.ru",
                   onSaved: (value) {
                   user.email = value;
                   },
@@ -42,9 +43,19 @@ class FormRegisterState extends State<FormRegister> {
               if (value.length < 8) return "Пароль должен содержать не менее 8 символов";
             },
               onSaved: (value) {
-              password = value;
+              _password = value;
               },
               decoration: InputDecoration(labelText: "Password"),
+              keyboardType: TextInputType.visiblePassword,
+              obscureText: true,
+            ),
+            new TextFormField(validator: (value){
+              if (value != _password) return "Пароли не совпадают";
+            },
+              onSaved: (value) {
+              _c_password = value;
+              },
+              decoration: InputDecoration(labelText: "Confirm password"),
               keyboardType: TextInputType.visiblePassword,
               obscureText: true,
             ),
@@ -68,7 +79,7 @@ class FormRegisterState extends State<FormRegister> {
               decoration: InputDecoration(labelText: "Отчество"),
             ),
             Row(children: <Widget>[
-              Text(user.date.toString()),
+              Text(user.stringDate()),
               SizedBox(width: 20.0),
               new RaisedButton(onPressed: (){
                 DatePicker.showDatePicker(context,
@@ -77,23 +88,28 @@ class FormRegisterState extends State<FormRegister> {
                     maxTime: DateTime(3000, 12, 31),
                     onConfirm: (date) {
                       setState(() {
-                        _todayDate = date;
+                        _todayDate = user.date;
                       });},
-                    currentTime: _todayDate, locale: LocaleType.ru);
+                    currentTime: _todayDate, 
+                    locale: LocaleType.ru);
               }, child: Text("Выбрать дату"),
               ),
             ],
             ),
             new SizedBox(height: 20.0),
-            new RaisedButton(onPressed: (){
+            new RaisedButton(onPressed: (){              
               _formKey.currentState.save();
-              if (_formKey.currentState.validate())
-                return showDialog(
-                    context: context, 
-                    builder: (BuildContext context) {
-                  return AlertDialog(title: Text("Проверка"), content: Text(user.toString()),
-                  );
-                });
+              if (_formKey.currentState.validate()){
+                Future future = RestApi.register(user.surname, user.user_name, user.subname, user.date, user.email, _password, _c_password);
+                future.then((value){
+                    return showDialog(
+                      context: context, 
+                      builder: (BuildContext context) {
+                    return AlertDialog(title: Text("Проверка"), content: Text(value["message"]),
+                    );
+                  });           
+                });  
+              }                            
             }, child: Text('Проверить'),
               color: Colors.blue,
               textColor: Colors.white,)

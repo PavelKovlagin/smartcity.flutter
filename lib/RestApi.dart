@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:smart_city/model/ModelComment.dart';
 import 'package:smart_city/model/ModelEvent.dart';
 
 class RestApi {
@@ -18,7 +17,6 @@ class RestApi {
   static Future getEventsResponse(String date) async {
     try{
       var res = await http.get(server + "/api/events?dateChange=" + date);
-      print("..." + res.body);
       if (res.statusCode == 200 || res.statusCode == 418) {
         return json.decode(res.body);
       } else {
@@ -32,7 +30,6 @@ class RestApi {
   static Future getEventResponse(String event_id) async {
     try{
       var res = await http.get(server + "/api/event?event_id=" + event_id);
-      print("..." + res.body);
       if (res.statusCode == 200 || res.statusCode == 418) {
         return json.decode(res.body);
       } else {
@@ -50,7 +47,6 @@ class RestApi {
          "Accept": "application/json"
       };
       var res = await http.get(server + "/api/profile", headers: headers);
-      print("..." + res.body);
       if (res.statusCode == 200 || res.statusCode == 418) {
         return json.decode(res.body);
       } 
@@ -66,7 +62,6 @@ class RestApi {
   static Future getUserResponse(String user_id) async {
     try{
       var res = await http.get(server + "/api/user/" + user_id );
-      print("..." + res.body);
       if (res.statusCode == 200 || res.statusCode == 418) {
         return json.decode(res.body);
       } 
@@ -82,7 +77,6 @@ class RestApi {
   static Future getOauthClient() async{
     try{
       var res = await http.get(server + "/api/getOauthClient");
-      print("..." + res.body);
       if (res.statusCode == 200 || res.statusCode == 418) {
         return json.decode(res.body);
       } 
@@ -105,8 +99,6 @@ class RestApi {
         "client_secret": client_secret
       };
       var res = await http.post(server + "/oauth/token",body: param);
-      print("..." + res.body);
-      print("CODE RESPONSE: " +res.statusCode.toString());
       if (res.statusCode == 200 || res.statusCode == 418) {      
         return _currentResponse(true, jsonDecode(res.body)["access_token"],  "OK");
       } 
@@ -126,7 +118,6 @@ class RestApi {
     List<ModelEvent> events;
     String link = server +'event?event_id=' + event_id;
     var res = await http.get(Uri.encodeFull(link));
-        print(res.body);
     if (res.statusCode == 200) {
 
       // If the server did return a 200 OK response, then parse the JSON.
@@ -144,8 +135,6 @@ class RestApi {
     String link = server + "events?dateChange=" + date;
     try{
       var res = await http.get(link);
-      print(res.body);
-
       if (res.statusCode == 200 || res.statusCode == 418) {
         var response = json.decode(res.body);
         var success = response["success"] as bool;
@@ -176,7 +165,6 @@ class RestApi {
         "Accept": "application/json"
       };
       var res = await http.get(server + "/api/statuses", headers: accept);
-      print("..." + res.body);
       if (res.statusCode == 200 || res.statusCode == 418) return json.decode(res.body);
       if (res.statusCode == 401) return _currentResponse(false, "[]", "Unauthenticated");
       if (res.statusCode == 429) return _currentResponse(false, "[]", "Too Many Requests");
@@ -188,11 +176,87 @@ class RestApi {
 
   static Future getCategories() async{
     try{
-      Map<String, String> accept = {
+      Map<String, String> heared = {
         "Accept": "application/json"
       };
-      var res = await http.get(server + "/api/categories", headers: accept);
-      print("..." + res.body);
+      var res = await http.get(server + "/api/categories", headers: heared);
+      if (res.statusCode == 200 || res.statusCode == 418) return json.decode(res.body);
+      if (res.statusCode == 401) return _currentResponse(false, "[]", "Unauthenticated");
+      if (res.statusCode == 429) return _currentResponse(false, "[]", "Too Many Requests");
+      return _currentResponse(false, "[]", "Error load");
+    } catch (Exception){      
+     return _currentResponse(false, "[]", "Error load");
+   }  
+  }
+
+  static Future updateUser(String token, int user_id, String surname, String name, String subname, DateTime date) async{
+    try{
+      Map<String, String> heared = {
+        "Accept": "application/json",
+        "Authorization": "Bearer " + token
+      };
+      Map<String, String> body = {
+        "user_id" : user_id.toString(),
+        "surname" : surname,
+        "name" : name,
+        "subname" : subname,
+        "date" : date.year.toString()+"-"+date.month.toString()+"-"+date.day.toString()
+      }; 
+      var res = await http.post(server + "/api/updateUser", headers: heared, body: body);
+      if (res.statusCode == 200 || res.statusCode == 418) return json.decode(res.body);
+      if (res.statusCode == 401) return _currentResponse(false, "[]", "Unauthenticated");
+      if (res.statusCode == 429) return _currentResponse(false, "[]", "Too Many Requests");
+      return _currentResponse(false, "[]", "Error load");
+    } catch (Exception){      
+     return _currentResponse(false, "[]", "Error load");
+   }  
+  }
+
+  static Future register(String surname, String name, String subname, DateTime date, String email, String password, String c_password) async{
+    try{
+      Map<String, String> body = {
+        "surname" : surname,
+        "name" : name,
+        "subname" : subname,
+        "date" : date.year.toString()+"-"+date.month.toString()+"-"+date.day.toString(),
+        "email" : email,
+        "password" : password,
+        "c_password" : c_password
+      }; 
+      var res = await http.post(server + "/api/register", body: body);
+      if (res.statusCode == 200 || res.statusCode == 418) return json.decode(res.body);
+      if (res.statusCode == 401) return _currentResponse(false, "[]", "Unauthenticated");
+      if (res.statusCode == 429) return _currentResponse(false, "[]", "Too Many Requests");
+      return _currentResponse(false, "[]", "Error load");
+    } catch (Exception){      
+     return _currentResponse(false, "[]", "Error load");
+   }  
+  }
+
+  static Future sendCode(String email) async{
+    try{
+      Map<String, String> body = {
+        "email" : email,
+      }; 
+      var res = await http.post(server + "/api/sendCode", body: body);
+      if (res.statusCode == 200 || res.statusCode == 418) return json.decode(res.body);
+      if (res.statusCode == 401) return _currentResponse(false, "[]", "Unauthenticated");
+      if (res.statusCode == 429) return _currentResponse(false, "[]", "Too Many Requests");
+      return _currentResponse(false, "[]", "Error load");
+    } catch (Exception){      
+     return _currentResponse(false, "[]", "Error load");
+   }  
+  }
+
+  static Future passwordChange(String email, String code_reset_password, String password, String password_confirm) async{
+    try{
+      Map<String, String> body = {
+        "email" : email,
+        "code_reset_password" : code_reset_password,
+        "password" : password,
+        "password_confirm" : password_confirm
+      }; 
+      var res = await http.post(server + "/api/passwordChange", body: body);
       if (res.statusCode == 200 || res.statusCode == 418) return json.decode(res.body);
       if (res.statusCode == 401) return _currentResponse(false, "[]", "Unauthenticated");
       if (res.statusCode == 429) return _currentResponse(false, "[]", "Too Many Requests");
