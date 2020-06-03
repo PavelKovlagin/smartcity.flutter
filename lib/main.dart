@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:smart_city/view/FormAddEvent.dart';
 import 'package:smart_city/view/FormChangePassword.dart';
 import 'package:smart_city/view/FormEvent.dart';
@@ -54,6 +55,9 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+      ]);
     return Home();
   }
 }

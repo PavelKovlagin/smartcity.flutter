@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_city/RestApi.dart';
 import 'package:smart_city/model/ModelCategory.dart';
@@ -31,10 +34,11 @@ class FormEventState extends State<FormEvent> {
   ModelUser _user = new ModelUser.empty(); 
   List<ModelCategory> _categories = null;
   List<ModelStatus> _statuses = null;
+  List<File> _images = new List<File>();
 
   String _event_id;
-  String currentCategory;
-  String currentStatus;
+  String _currentCategory;
+  int _newCategoryId;
 
   FormEventState(String event_id){
     this._event_id = event_id;
@@ -73,9 +77,26 @@ class FormEventState extends State<FormEvent> {
     });
   }
 
+  _showDialogImageFile(File image){
+    return showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        content: Image.file(image),
+        actions: <Widget>[
+          FlatButton(
+            child: Text('Закрыть'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    });
+  }
+
   _eventInformationNotEditWidget(){
     return Expanded(
-        flex: 4,
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -105,103 +126,145 @@ class FormEventState extends State<FormEvent> {
 
   _dropListCategories(List<ModelCategory> categories){
     return DropdownButton(
-      value: currentCategory,
+      value: _currentCategory,
       onChanged: (String newValue) {
         setState(() {
-          currentCategory = newValue;
+          _currentCategory = newValue;
         });
       },
       hint: Text("Категория"),
       items: categories.map<DropdownMenuItem<String>>((ModelCategory value) {
         return DropdownMenuItem<String>(
           value: value.categoryName,
+          onTap: (){
+            _newCategoryId = value.id;
+          },
           child: Text(value.categoryName),
         );}).toList(),
     );
   }
 
   _eventInformationEditWidget(){
-    return Expanded(   
-    flex: 4,
-      child: SingleChildScrollView(
-        child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    final _formKeyEvent = GlobalKey<FormState>();    
+    return Form(
+      key: _formKeyEvent,
+        child: Expanded(
+          flex: 3,
+          child: Column(
           children: <Widget>[
-            Row(
-              children: <Widget>[
-                Text("Ппользователь: "),
-                InkWell(child: Text(_event.email, style: TextStyle(color: Colors.blue)), onTap: () => Navigator.pushNamed(context, "/profile/" + _event.user_id.toString()))
-              ],
-            ), 
-            Text("Широта: " + _event.latitude.toString()),
-            Text("Долгота: " + _event.longitude.toString()), 
-            Text("Статус события: " + _event.statusName),
-            Builder(builder: (value){
-              if (_categories == null){
-                return FutureBuilder(
-                  future: RestApi.getCategories(),
-                  builder: (context, snapshot){
-                    if (snapshot.hasData){
-                      if (snapshot.data["success"]){
-                        _categories = snapshot.data["data"].map<ModelCategory>((json)=>ModelCategory.fromJson(json)).toList();
-                        currentCategory = _event.categoryName;
-                        return _dropListCategories(_categories);        
+             RaisedButton(
+              child: Text("Редактировать"),
+              onPressed: (){
+                _formKeyEvent.currentState.save();
+                print(_event.toString());
+                if (_formKeyEvent.currentState.validate())
+                {
+                  Future future = _getToken();
+                  future.then((value){
+                    Future future = RestApi.updateEvent(value, _event.id, _event.eventName, _event.eventDescription, _event.longitude, _event.latitude, _newCategoryId);
+                    future.then((value){
+                      if (value["success"]){
+                        setState(() {});
                       } else {
-                        return Text(snapshot.data["message"]);                    
-                      }            
-                    } else {
-                      return CircularProgressIndicator();
-                    }
-                  },
-                );
-              } else {
-                return _dropListCategories(_categories);
-              }
-            }),
-            
-            TextFormField(validator: (value){
-              if (value.isEmpty) return "Введите название события";
-            },
-            onSaved: (value){
-              _event.eventName = value;
-            },
-            initialValue: _event.eventName,
-            decoration: InputDecoration(labelText: "Название события"),
-            keyboardType: TextInputType.multiline,
-            maxLines: null,
+                        return showDialog(
+                          context: context,
+                          builder: (BuildContext context){
+                            return AlertDialog(title: Text("Error"), content: Text(value["message"]));
+                          });
+                      }
+                    });
+                  });
+                }
+              },
+              color: Colors.blue,
+              textColor: Colors.white,
             ),
-            TextFormField(validator: (value){
-              if (value.isEmpty) return "Введите описание события";
-            },
-            onSaved: (value){
-              _event.eventDescription = value;
-            },
-            initialValue: _event.eventDescription,
-            decoration: InputDecoration(labelText: "Описание события"),
-            keyboardType: TextInputType.multiline,
-            maxLines: null,
-            
+            Expanded(   
+              child: SingleChildScrollView(
+                child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[                   
+                    Row(
+                      children: <Widget>[
+                        Text("Пользователь: "),
+                        InkWell(child: Text(_event.email, style: TextStyle(color: Colors.blue)), 
+                        onTap: () {
+                          Navigator.pushNamed(context, "/profile/" + _event.user_id.toString()).then((value){
+                            
+                          });
+                          
+                        })
+                      ],
+                    ), 
+                    Text("Широта: " + _event.latitude.toString()),
+                    Text("Долгота: " + _event.longitude.toString()), 
+                    Text("Статус события: " + _event.statusName),
+                    Builder(builder: (value){
+                      if (_categories == null){
+                        return FutureBuilder(
+                          future: RestApi.getCategories(),
+                          builder: (context, snapshot){
+                            if (snapshot.hasData){
+                              if (snapshot.data["success"]){
+                                _categories = snapshot.data["data"].map<ModelCategory>((json)=>ModelCategory.fromJson(json)).toList();                        
+                                _currentCategory = _event.categoryName;
+                                return _dropListCategories(_categories);        
+                              } else {
+                                return Text(snapshot.data["message"]);                    
+                              }            
+                            } else {
+                              return CircularProgressIndicator();
+                            }
+                          },
+                        );
+                      } else {
+                        return _dropListCategories(_categories);
+                      }
+                    }),
+                    
+                    TextFormField(validator: (value){
+                      if (value.isEmpty) return "Введите название события";
+                    },
+                    onSaved: (value){
+                      _event.eventName = value;
+                    },
+                    initialValue: _event.eventName,
+                    decoration: InputDecoration(labelText: "Название события"),
+                    keyboardType: TextInputType.multiline,
+                    maxLines: null,
+                    ),
+                    TextFormField(validator: (value){
+                      if (value.isEmpty) return "Введите описание события";
+                    },
+                    onSaved: (value){
+                      _event.eventDescription = value;
+                    },
+                    initialValue: _event.eventDescription,
+                    decoration: InputDecoration(labelText: "Описание события"),
+                    keyboardType: TextInputType.multiline,
+                    maxLines: null,
+                    
+                    ),
+                  ],
+                )
+              )
             ),
-                       
           ],
+        ),
         )
-      )
-    );   
+    );
   }
 
   _getExpandedComments(){
     return Expanded(
-      flex: 4,
-      child: Container(
-      height: 200,
-        child: ListView.builder(                        
+      flex: 2,
+      child: ListView.builder(                        
         itemCount: _event.comments.length,
           itemBuilder: (context, index) {
             final comment = _event.comments[index];
             return Card(
               child: Column (
-                children: <Widget>[
-                  
+                children: <Widget>[                
                   ListTile(
                     title: Row(children: <Widget>[
                       Expanded(
@@ -212,22 +275,33 @@ class FormEventState extends State<FormEvent> {
                         },
                       ),
                       ),
-                      Expanded(child: Text(comment.stringDate())),
-                      IconButton(
-                        icon: Icon(Icons.delete),
-                        onPressed: (){
-                          Future future = _getToken();
-                          future.then((value){
-                            Future future = RestApi.deleteComment(value, comment.id);
-                            future.then((value){
-                              print(value["message"]);
-                              setState(() {
-                                
+                      Expanded(child: Text(comment.stringDate())),                      
+                      Builder(builder: (value){
+                        if (_user.user_id == comment.user_id){
+                          return IconButton(
+                            icon: Icon(Icons.delete),
+                            onPressed: (){
+                              Future future = _getToken();
+                              future.then((value){
+                                Future future = RestApi.deleteComment(value, comment.id);
+                                future.then((value){
+                                  if (value["success"]){
+                                    setState(() {});
+                                  } else {
+                                    return showDialog(
+                                    context: context, 
+                                    builder: (BuildContext context) {                          
+                                    return AlertDialog(title: Text("Error"), content: Text(value["message"]));
+                                    });                           
+                                  }
+                                });
                               });
-                            });
-                          });
-                        },
-                      )
+                            },
+                          );
+                        } else {
+                          return SizedBox();
+                        }
+                      })
                     ],),
                     subtitle: Text(comment.text),
                   ),
@@ -252,13 +326,11 @@ class FormEventState extends State<FormEvent> {
             );
           }
         )
-      ),
     );
   }
 
   _getExpandedEventImage(){
     return Expanded(
-      flex: 2,
       child: Container(                                   
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
@@ -281,69 +353,113 @@ class FormEventState extends State<FormEvent> {
     if (_user.user_id > 0) {
       final _formCommentKey = GlobalKey<FormState>();
       String _comment;
-      return Form(
+        return Form(
         key: _formCommentKey,
-        child: Expanded(
-      flex: 1,
-          child: Container (
-          height: 200,
-          child: Row(
-            children: <Widget>[
-              Expanded(
-                flex: 6,
-                child: 
-                TextFormField(validator: (value){
+        child: Container(
+        child: Column(
+          children: <Widget>[
+          //область для отображения изрбражений
+          // Expanded (
+          //   flex: 2,              
+          //   child:Builder(
+          //     builder:(value){
+          //       if (_images.length <= 0){
+          //         return SizedBox();
+          //       } else {
+          //        return ListView.builder(
+          //           scrollDirection: Axis.horizontal,                    
+          //           itemCount: _images.length,
+          //           itemBuilder: (context, index) {
+          //           final image = _images[index];
+          //             return  GestureDetector(
+          //               child: Image.file(image),
+          //               onTap: (){
+          //                 _showDialogImageFile(image);                       
+          //               },
+          //             );
+          //           }
+          //         );
+          //       }
+          //     } 
+          //   )            
+          // ),
+          Row(children: <Widget>[
+            Expanded(
+              flex: 3,
+              child: TextFormField(
+                validator: (value){
                   
-                },
+                  },
                 onSaved: (value){
-                  _comment = value;
-                },
-                decoration: InputDecoration(hintText: "Введите комментарий"),
-                ),
-                ),
-                Expanded (
-                  flex: 2,              
-                  child: Row(
-                  children: <Widget>[
-                    IconButton(                        
-                    onPressed: (){
-                      return showDialog(
-                        context: context, 
-                        builder: (BuildContext context) {
-                          return AlertDialog(title: Text("Изображение"), content: Text("Загразка изображения"),
-                        );}
-                      );                     
-                    },
-                    color: Colors.black,
-                    icon: Icon(Icons.attach_file),
-                    ),
-                    IconButton(                        
-                    onPressed: (){
-                      _formCommentKey.currentState.save();
-                      if (_formCommentKey.currentState.validate()){
-                        Future future = _getToken();
-                        future.then((value){
-                          Future future = RestApi.addComment(value, _comment, _event.id);
-                          future.then((value){
-                            print(value["message"]);
-                            setState(() {
-                              
-                            });
-                          }); 
-                        });                        
-                      }                        
-                    },
-                    color: Colors.black,
-                    icon: Icon(Icons.send),
-                    ),
-                  ],
-                  )
-                )
-              ],
+                _comment = value;
+              },
+              decoration: InputDecoration(hintText: "Введите комментарий"),
+              ),
             ),
+            //кнопка для загрузки изображения
+            // Expanded(
+            //   flex: 1,
+            //   child:IconButton(onPressed: () async {
+            //     final File photo = await ImagePicker.pickImage(source: ImageSource.gallery);
+            //     if (photo != null) {
+            //         return showDialog(
+            //             context: context, 
+            //             builder: (BuildContext context) {                          
+            //           return AlertDialog(
+            //             title: Text("Изображение"), 
+            //             content: Image.file(photo),
+            //             actions: <Widget>[
+            //               FlatButton(
+            //               child: Text('Добавить'),
+            //               onPressed: () {
+            //                 setState(() {
+            //                   _images.add(photo);
+            //                   Navigator.of(context).pop();                                
+            //                 });                              
+            //               }),
+            //             ],
+            //           );
+            //         });
+            //     }          
+            //     },
+            //     icon: Icon(Icons.attach_file),
+            //     color: Colors.black,
+            //   ), 
+            // ),
+            Expanded(
+              child: IconButton(                        
+                onPressed: (){
+                _formCommentKey.currentState.save();
+                if (_formCommentKey.currentState.validate()){
+                  Future future = _getToken();
+                  future.then((value){
+                    Future future = RestApi.addComment(value, _comment, _event.id, _images);
+                    future.then((value){
+                      if (value["success"]) {
+                        setState((){
+                          _images.clear();
+                        });
+                      } else {
+                        return showDialog(
+                          context: context, 
+                          builder: (BuildContext context) {                          
+                          return AlertDialog(title: Text("Error"), content: Text(value["message"]));
+                      });
+                      }                           
+                    }); 
+                  });                        
+                }                        
+              },
+              color: Colors.black,
+              icon: Icon(Icons.send),
+              ),
+            ),
+          ],
           )
-        )
-      );
+        ],
+        ),
+      )
+    );
     } else {
       return SizedBox();
     }   

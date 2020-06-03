@@ -116,7 +116,11 @@ class ModelEvent{
 
   set eventDescription(value){
     _eventDescription = value;
-  }  
+  } 
+
+  set category_id(value){
+    _category_id = value;
+  } 
 
   set latitude(value){
     _latitude = value;

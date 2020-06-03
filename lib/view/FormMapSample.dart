@@ -24,6 +24,8 @@ class FormMapSampleState extends State<FormMapSample> {
 
   String currentStatus = "Все";
   String currentCategory = "Все";
+  List<ModelCategory> _categories = null;
+  List<ModelStatus> _statuses = null;
 
   double _userLatitude =  56.146405, _userLongitude = 40.379389; //Владимир
   //double _userLatitude =  55.753076, _userLongitude = 37.667272; //Москва
@@ -155,75 +157,95 @@ class FormMapSampleState extends State<FormMapSample> {
     }
   }
 
+  _dropListCategories(){
+    return DropdownButton(
+      value: currentCategory,
+      onChanged: (String newValue) {
+        setState(() {
+          currentCategory = newValue;
+        });
+      },
+      hint: Text("Категория"),
+      items: _categories.map<DropdownMenuItem<String>>((ModelCategory value) {
+        return DropdownMenuItem<String>(
+          value: value.categoryName,
+          child: Text(value.categoryName),
+        );}).toList(),
+    );
+  }
+
+  _dropListStatuses(){
+    return DropdownButton(
+      value: currentStatus,
+      onChanged: (String newValue) {
+        setState(() {
+          currentStatus = newValue;
+        });
+      },
+      hint: Text("Статус"),
+      items: _statuses.map<DropdownMenuItem<String>>((ModelStatus value) {
+        return DropdownMenuItem<String>(
+          value: value.statusName,
+          child: Text(value.statusName),
+        );}).toList(),
+    );
+  }
+
   _dropLists(){
     return Expanded(
       flex: 1,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
-        children: <Widget>[
-          FutureBuilder(
-            future: RestApi.getStatuses(),
-            builder: (context, snapshot){
-              if (snapshot.hasData){
-                if (snapshot.data["success"]){
-                  List<ModelStatus> statuses = snapshot.data["data"].map<ModelStatus>((json)=>ModelStatus.fromJson(json)).toList();
-                  statuses.add(ModelStatus(0, "Все", "Все статусы")); 
-                  print(statuses.length);             
-                  return DropdownButton(
-                    value: currentStatus,
-                    onChanged: (String newValue) {
-                      setState(() {
-                        currentStatus = newValue;
-                      });
-                    },
-                    hint: Text("Статус"),
-                    items: statuses.map<DropdownMenuItem<String>>((ModelStatus value) {
-                      return DropdownMenuItem<String>(
-                        value: value.statusName,
-                        child: Text(value.statusName),
-                      );}).toList(),
-                  );
-                } else {
-                  return Text(snapshot.data["message"]);
-                  
-                }            
+        children: <Widget>[          
+          Builder(
+            builder: (value){
+              if (_statuses == null){
+                return FutureBuilder(
+                  future: RestApi.getStatuses(),
+                  builder: (context, snapshot){
+                    if (snapshot.hasData){
+                      if (snapshot.data["success"]){
+                        _statuses = snapshot.data["data"].map<ModelStatus>((json)=>ModelStatus.fromJson(json)).toList();
+                        _statuses.add(ModelStatus(0, "Все", "Все статусы")); 
+                        return _dropListStatuses();                        
+                      } else {
+                        return Text(snapshot.data["message"]);                        
+                      }            
+                    } else {
+                      return CircularProgressIndicator();
+                    }
+                  },
+                );
               } else {
-                return CircularProgressIndicator();
+                return _dropListStatuses();
               }
             },
           ),
-          FutureBuilder(
-            future: RestApi.getCategories(),
-            builder: (context, snapshot){
-              if (snapshot.hasData){
-                if (snapshot.data["success"]){
-                  List<ModelCategory> categories = snapshot.data["data"].map<ModelCategory>((json)=>ModelCategory.fromJson(json)).toList();
-                  categories.add(ModelCategory(0, "Все", "Все категории")); 
-                  print(categories.length);             
-                  return DropdownButton(
-                    value: currentCategory,
-                    onChanged: (String newValue) {
-                      setState(() {
-                        currentCategory = newValue;
-                      });
-                    },
-                    hint: Text("Категория"),
-                    items: categories.map<DropdownMenuItem<String>>((ModelCategory value) {
-                      return DropdownMenuItem<String>(
-                        value: value.categoryName,
-                        child: Text(value.categoryName),
-                      );}).toList(),
-                  );
-                } else {
-                  return Text(snapshot.data["message"]);
-                  
-                }            
+          Builder(
+            builder: (value){
+              if (_categories == null){
+                return FutureBuilder(
+                  future: RestApi.getCategories(),
+                  builder: (context, snapshot){
+                    if (snapshot.hasData){
+                      if (snapshot.data["success"]){
+                        _categories = snapshot.data["data"].map<ModelCategory>((json)=>ModelCategory.fromJson(json)).toList();
+                        _categories.add(ModelCategory(0, "Все", "Все категории")); 
+                        return _dropListCategories();                        
+                      } else {
+                        return Text(snapshot.data["message"]);                        
+                      }            
+                    } else {
+                      return CircularProgressIndicator();
+                    }
+                  },
+                );
               } else {
-                return CircularProgressIndicator();
+                return _dropListCategories();
               }
             },
-          ),
+          )
         ],
       ),
       )

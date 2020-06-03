@@ -369,7 +369,19 @@ class FormProfileState extends State<FormProfile> {
             child: ListTile(
                   title: Text(event.eventName), 
                   subtitle: Text(event.eventDescription),
-                  onTap: () => Navigator.pushNamed(context, '/event/' + event.id.toString()),
+                  onTap: (){
+                    Navigator.pushNamed(context, '/event/' + event.id.toString()).then((value){
+                      Future future = _getToken();
+                      future.then((value){
+                        Future future = RestApi.getProfileResponse(value);
+                        future.then((value){
+                          setState(() {
+                            _user = ModelUser.fromJson(value["data"]);
+                          });
+                        }); 
+                      });       
+                    });
+                  }
                 ),
           );
         }
