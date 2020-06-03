@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_city/RestApi.dart';
-import 'package:smart_city/model/ModelEvent.dart';
 import 'package:smart_city/model/ModelUser.dart';
 
 class FormProfile extends StatefulWidget{
@@ -50,8 +49,10 @@ class FormProfileState extends State<FormProfile> {
 
   void _logout(){
     setState(() {  
-      _removeToken(); 
-      _user = null;                     
+      Future future = _removeToken(); 
+      future.then((value){
+        _user = null; 
+      });                          
     });
   }
 
@@ -116,7 +117,7 @@ class FormProfileState extends State<FormProfile> {
                 if (snapshot.hasData ) {
                   if (snapshot.data["success"]) {
                     _user = ModelUser.fromJson(snapshot.data["data"]);
-                    return _getProfileInformationWidget();
+                    return _getProfileInformationWidget(_user);
                   } else {
                     return _getAuthWidget();
                   }              
@@ -127,7 +128,7 @@ class FormProfileState extends State<FormProfile> {
               }
               );
             } else {
-              return _getProfileInformationWidget();
+              return _getProfileInformationWidget(_user);
             }
           } else {            
             return _getAuthWidget();
@@ -196,6 +197,7 @@ class FormProfileState extends State<FormProfile> {
                           });
                         } else {
                           setState(() {
+                            _user = null;
                             _setToken(value["data"]);                            
                           });
                         }
@@ -219,7 +221,7 @@ class FormProfileState extends State<FormProfile> {
                   onTap: (){
                     Navigator.pushNamed(context, '/sendCode');
                   },
-                  child: Text("Забыли пароль? Ну вы и лох, ладно, жмите сюда", style: TextStyle(color: Colors.blue)),
+                  child: Text("Забыли пароль?", style: TextStyle(color: Colors.blue)),
                 )
               ],
             ),
@@ -247,7 +249,7 @@ class FormProfileState extends State<FormProfile> {
     );
   }
 
-  _getProfileInformationWidget(){
+  _getProfileInformationWidget(ModelUser user){
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -273,35 +275,35 @@ class FormProfileState extends State<FormProfile> {
                   ),
                   
                   Builder(builder: (value){           
-                    if (_user.blocked) {
-                      return Text("Пользователь заблокирован до " + _user.stringBlockDate(), style: _errorTextStyle);
+                    if (user.blocked) {
+                      return Text("Пользователь заблокирован до " + user.stringBlockDate(), style: _errorTextStyle);
                     } else {
                       return Text("Пользователь не заблокирован", style: _successTextStype); 
                     }          
                   },
                   ),
-                  Text("Email: " + _user.email, style: _usualTextStyle),
+                  Text("Email: " + user.email, style: _usualTextStyle),
                   TextFormField(
                     onSaved: (value){
-                      _user.surname = value;
+                      user.surname = value;
                     },
-                    initialValue: _user.surname,
+                    initialValue: user.surname,
                     decoration: InputDecoration(labelText: "Фамилия"),
                     maxLines: 1,
                   ),
                   TextFormField(
                     onSaved: (value){
-                      _user.user_name = value;
+                      user.user_name = value;
                     },
-                    initialValue: _user.user_name,
+                    initialValue: user.user_name,
                     decoration: InputDecoration(labelText: "Имя"),
                     maxLines: 1,
                   ),
                   TextFormField(
                     onSaved: (value){
-                      _user.subname = value;
+                      user.subname = value;
                     },
-                    initialValue: _user.subname,
+                    initialValue: user.subname,
                     decoration: InputDecoration(labelText: "Отчество"),
                     maxLines: 1,
                   ),
@@ -314,12 +316,12 @@ class FormProfileState extends State<FormProfile> {
                           maxTime: DateTime(3000, 12, 31),
                           onConfirm: (date) {
                             setState(() {
-                              _user.date = date; 
+                              user.date = date; 
                             });
                           },
-                          currentTime: _user.date,
+                          currentTime: user.date,
                           locale: LocaleType.ru);
-                    }, child: Text(_user.stringDate()),
+                    }, child: Text(user.stringDate()),
                     ),
                   ],
                   ),                  
@@ -332,7 +334,7 @@ class FormProfileState extends State<FormProfile> {
                       if (_formKey.currentState.validate()){
                         Future future = _getToken();
                         future.then((value){
-                          Future future = RestApi.updateUser(value, _user.user_id, _user.surname, _user.user_name, _user.subname, _user.date);
+                          Future future = RestApi.updateUser(value, user.user_id, user.surname, user.user_name, user.subname, user.date);
                           future.then((value){
                             return showDialog(
                                 context: context, 

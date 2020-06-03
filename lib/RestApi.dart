@@ -265,4 +265,43 @@ class RestApi {
      return _currentResponse(false, "[]", "Error load");
    }  
   }
+
+  static Future addComment(String token, String comment, int event_id) async{
+    try{
+      Map<String, String> header = {
+        "Authorization" : "Bearer " + token,
+        "Accept" : "application/json"
+      };
+      Map<String, String> body = {
+        "comment" : comment,
+        "event_id" : event_id.toString()
+      }; 
+      var res = await http.post(server + "/api/addComment", headers: header, body: body);
+      if (res.statusCode == 200 || res.statusCode == 418) return json.decode(res.body);
+      if (res.statusCode == 401) return _currentResponse(false, "[]", "Unauthenticated");
+      if (res.statusCode == 429) return _currentResponse(false, "[]", "Too Many Requests");
+      return _currentResponse(false, "[]", "Error load");
+    } catch (Exception){      
+     return _currentResponse(false, "[]", "Error load");
+   }  
+  }
+
+  static Future deleteComment(String token, int comment_id) async{
+    try{
+      Map<String, String> header = {
+        "Authorization" : "Bearer " + token,
+        "Accept" : "application/json"
+      };
+      Map<String, String> body = {
+        "comment_id" : comment_id.toString(),
+      }; 
+      var res = await http.post(server + "/api/deleteComment", headers: header, body: body);
+      if (res.statusCode == 200 || res.statusCode == 418) return json.decode(res.body);
+      if (res.statusCode == 401) return _currentResponse(false, "[]", "Unauthenticated");
+      if (res.statusCode == 429) return _currentResponse(false, "[]", "Too Many Requests");
+      return _currentResponse(false, "[]", "Error load");
+    } catch (Exception){      
+     return _currentResponse(false, "[]", "Error load");
+   }  
+  }
 }

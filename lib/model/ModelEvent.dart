@@ -1,3 +1,7 @@
+import 'package:smart_city/model/ModelComment.dart';
+
+import 'ModelImage.dart';
+
 class ModelEvent{
 
   int _id;
@@ -14,6 +18,8 @@ class ModelEvent{
   int _user_id;
   String _email;
   int _visibilityForUser;
+  List<ModelComment> _comments;
+  List<ModelImage> _images;
 
   ModelEvent.def(){
     
@@ -32,7 +38,9 @@ class ModelEvent{
         String categoryName,
         int user_id,
         String email,
-        int visibilityForUser) {
+        int visibilityForUser,
+        List<ModelComment> comments,
+        List<ModelImage> images) {
     _id = id;
     _eventName = eventName;
     _eventDescription = eventDescription;
@@ -48,9 +56,15 @@ class ModelEvent{
     _user_id = user_id;
     _email = email;
     _visibilityForUser = visibilityForUser;
+    _comments = comments;
+    _images = images;
   }
 
   factory ModelEvent.fromJson(Map<String, dynamic> json){
+    List<ModelComment> comments = new List<ModelComment>();
+    List<ModelImage> images = null;
+    if (json["comments"] != null) comments = json["comments"].map<ModelComment>((json)=>ModelComment.fromJson(json)).toList();
+    if (json["eventImages"] != null) images = json["eventImages"].map<ModelImage>((json)=>ModelImage.fromJson(json)).toList();
     return ModelEvent(
       json["id"],
       json["eventName"],
@@ -65,7 +79,9 @@ class ModelEvent{
       json["categoryName"],
       json["user_id"],
       json["email"],
-      json["visibilityForUser"]
+      json["visibilityForUser"],
+      comments,
+      images
     ); 
   }
 
@@ -83,10 +99,16 @@ class ModelEvent{
   get user_id => _user_id;
   get email => _email;   
   get visibilityForUser => _visibilityForUser;
+  List<ModelComment> get comments => _comments;
+  List<ModelImage> get images => _images;
 
   set id(value) {
     _id = value;
   }  
+
+  set catetoryName(value){
+    _categoryName = value;
+  }
 
   set eventName(value) {
     _eventName = value;
