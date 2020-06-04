@@ -92,20 +92,17 @@ class DBprovider {
 
   setEvents(List<ModelEvent> events){
     try{
-      for (ModelEvent event in events) {
-        print("EVENT_VISIBILITY_USER: " + event.toString());        
+      for (ModelEvent event in events) {    
           Future future = selectEvent(event.id);
           future.then((value){
             ModelEvent selectEvent = value;
-            print("SELECTED EVENT: " + selectEvent.toString());
             if (event.visibilityForUser == 1){ 
               if (selectEvent == null) {
-              _insertEvent(event);
+                _insertEvent(event);
               } else {
                 _updateEvent(event);
               } 
             } else {
-              print("ИХ НУЖНО УДАЛИТЬ!!! " + event.visibilityForUser.toString());
             _deleteEvent(event.id);
             } 
           });  

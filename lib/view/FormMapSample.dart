@@ -36,11 +36,8 @@ class FormMapSampleState extends State<FormMapSample> {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String dateLastUpdate = preferences.getString("dateLastUpdate");    
     if (dateLastUpdate == null) {
-      DateTime now = DateTime.now();
-      print("IAMNULL");
-      dateLastUpdate =  now.year.toString()+"-"+now.month.toString()+"-"+now.day.toString()+" "+now.hour.toString()+":"+now.minute.toString()+":"+now.second.toString();
+      dateLastUpdate = '0001-1-1';
     }
-    print("GET_DATE_LAST_UPDATE: " + dateLastUpdate);
     return dateLastUpdate;
   }
 
@@ -83,7 +80,6 @@ class FormMapSampleState extends State<FormMapSample> {
   Future _getEvents() async {
     Future future = _getDateLastUpdate();
     future.then((value){
-      print("VALUE = " + value);
       Future future = RestApi.events(value);
       future.then((value){
         if (value["success"]){
@@ -91,9 +87,7 @@ class FormMapSampleState extends State<FormMapSample> {
           DBprovider.db.setEvents(events);
           _setDateLastUpdate(); 
           setState(() {});
-          //_selectEventsFromDB();
         } else {
-          print(value["message"].toString());
           _showMyDialog(value["message"].toString());
         }        
       });  
@@ -107,10 +101,9 @@ class FormMapSampleState extends State<FormMapSample> {
             point: new LatLng(event.latitude, event.longitude),
             width: 40,
             height: 40,
-            builder: (ctx) => new IconButton(
-                icon: Icon(Icons.location_on),
-                iconSize: 40,
-                onPressed: () {
+            builder: (ctx) => new GestureDetector(
+                child: new Icon(Icons.location_on),
+                onTap: () {
                   return showDialog(
                       context: context,
                       builder: (BuildContext context) {
@@ -118,7 +111,7 @@ class FormMapSampleState extends State<FormMapSample> {
                           title: Text(event.eventName),
                           content: Text(event.eventDescription),
                           actions: <Widget>[
-                            RaisedButton(
+                            new RaisedButton(
                               onPressed: () {            
                                 Navigator.pushNamed(context, "/event/" + event.id.toString());
                               },
@@ -315,9 +308,10 @@ class FormMapSampleState extends State<FormMapSample> {
                           color: Colors.black12,
                           borderStrokeWidth: 3),
                       builder: (context, markers) {
-                        return new FloatingActionButton(
-                          child: Text(markers.length.toString()),
-                          onPressed: null,
+                        return new Container(
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(shape: BoxShape.circle,color: Colors.blue),
+                          child: Text(markers.length.toString(), style: TextStyle(color: Colors.white),),
                         );
                       },
                     ),
@@ -345,7 +339,6 @@ class FormMapSampleState extends State<FormMapSample> {
 
   _panel(){
     return Expanded(
-      flex: 2,
       child: Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -354,17 +347,10 @@ class FormMapSampleState extends State<FormMapSample> {
               Navigator.pushNamed(context,
                   '/addEvent/${_position.longitude.toString()}/${_position.latitude.toString()}');
           },
-          iconSize: 80 ,
-          icon: Icon(Icons.add_circle),
+          icon: new Icon(Icons.add_circle),
           color: Colors.blue,
         ),
-        new IconButton(
-            onPressed: () {                                                  
-              
-            },
-            iconSize: 80,
-            icon: Icon(Icons.center_focus_strong),
-            color: Colors.blue)
+
       ],
     ),
     );
@@ -382,10 +368,9 @@ class FormMapSampleState extends State<FormMapSample> {
           point: new LatLng(_userLatitude, _userLongitude),
           width: 40,
           height: 40,
-          builder: (ctx) => new IconButton(
-              icon: Icon(Icons.person_pin_circle),
-              iconSize: 40,
-              onPressed: null)));
+          builder: (ctx) => new GestureDetector(
+              child: new Icon(Icons.person_pin_circle),
+              onTap: null)));
     } else {
 
     }
@@ -393,20 +378,31 @@ class FormMapSampleState extends State<FormMapSample> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Карта"),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.update),
+        actions: <Widget>[                    
+          new IconButton(
+            icon: new Icon(Icons.update),
             onPressed: () {
               _getEvents();
             },
-          )
+          ),
+          new IconButton(
+            icon: new Icon(Icons.add),
+            onPressed: (){
+              if (_position == null){
+                _showMyDialog("Позиция не определена. Возможно не включен GPS");                
+              } else {             
+                Navigator.pushNamed(context,
+                  '/addEvent/${_position.longitude.toString()}/${_position.latitude.toString()}'); 
+              }                           
+            },
+          ),
         ],
       ),
       body: Column(
         children: <Widget>[          
           _dropLists(),
           _map(),          
-          _panel(),
+          //_panel(),
         ],
       ),
     );
