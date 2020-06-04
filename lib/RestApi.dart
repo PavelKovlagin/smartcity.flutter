@@ -15,19 +15,6 @@ class RestApi {
     };
   }
 
-  static Future getEventsResponse(String date) async {
-    try{
-      var res = await http.get(server + "/api/events?dateChange=" + date);
-      if (res.statusCode == 200 || res.statusCode == 418) {
-        return json.decode(res.body);
-      } else {
-        return null;
-      }   
-    } catch (Exception){      
-     return null;
-   }     
-  }
-
   static Future getEventResponse(String event_id) async {
     try{
       var res = await http.get(server + "/api/event?event_id=" + event_id);
@@ -353,5 +340,17 @@ class RestApi {
     } catch (Exception){      
      return _currentResponse(false, "[]", "Error load");
    }  
+  }
+
+  static Future events(String date) async {
+    try{
+      var res = await http.get(server + "/api/events?dateChange=" + date);
+      if (res.statusCode == 200 || res.statusCode == 418) return json.decode(res.body);
+      if (res.statusCode == 401) return _currentResponse(false, "[]", "Unauthenticated");
+      if (res.statusCode == 429) return _currentResponse(false, "[]", "Too Many Requests");
+      return _currentResponse(false, "[]", "Error load");
+    } catch (Exception){      
+     return _currentResponse(false, "[]", "Error load");
+   }   
   }
 }

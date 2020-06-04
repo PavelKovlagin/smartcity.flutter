@@ -5,6 +5,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong/latlong.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_city/DBprovider.dart';
 import 'package:smart_city/RestApi.dart';
 import 'package:smart_city/model/ModelCategory.dart';
@@ -29,6 +30,26 @@ class FormMapSampleState extends State<FormMapSample> {
 
   double _userLatitude =  56.146405, _userLongitude = 40.379389; //Владимир
   //double _userLatitude =  55.753076, _userLongitude = 37.667272; //Москва
+
+
+  Future<String> _getDateLastUpdate() async{
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String dateLastUpdate = preferences.getString("dateLastUpdate");    
+    if (dateLastUpdate == null) {
+      DateTime now = DateTime.now();
+      print("IAMNULL");
+      dateLastUpdate =  now.year.toString()+"-"+now.month.toString()+"-"+now.day.toString()+" "+now.hour.toString()+":"+now.minute.toString()+":"+now.second.toString();
+    }
+    print("GET_DATE_LAST_UPDATE: " + dateLastUpdate);
+    return dateLastUpdate;
+  }
+
+  Future _setDateLastUpdate() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    DateTime now = DateTime.now();
+    String dateLastUpdate = now.year.toString()+"-"+now.month.toString()+"-"+now.day.toString()+" "+now.hour.toString()+":"+now.minute.toString()+":"+now.second.toString();
+    preferences.setString('dateLastUpdate', dateLastUpdate);
+  }
 
   double _zoom = 10;
 
@@ -60,8 +81,23 @@ class FormMapSampleState extends State<FormMapSample> {
 }
 
   Future _getEvents() async {
-    var events = await RestApi.getEventsResponse("2000-05-26 11:11:11");
-    return events;
+    Future future = _getDateLastUpdate();
+    future.then((value){
+      print("VALUE = " + value);
+      Future future = RestApi.events(value);
+      future.then((value){
+        if (value["success"]){
+          List<ModelEvent>events = value["data"].map<ModelEvent>((json)=>ModelEvent.fromJson(json)).toList();
+          DBprovider.db.setEvents(events);
+          _setDateLastUpdate(); 
+          setState(() {});
+          //_selectEventsFromDB();
+        } else {
+          print(value["message"].toString());
+          _showMyDialog(value["message"].toString());
+        }        
+      });  
+    });    
   }
   
   Future<List<Marker>> _addMarkers(List<ModelEvent> events) async {   
@@ -112,16 +148,6 @@ class FormMapSampleState extends State<FormMapSample> {
         print('whenInUse status: $status');
       });
     }
-
-  void _selectEventsFromDB(){
-    Future<List<ModelEvent>> future = DBprovider.db.selectEvents("", "");
-      future.then((value){        
-        List<ModelEvent> events = value;
-        setState(() {
-          //addMarkers(events);
-        });        
-      });
-  }
 
   @override
   void initState() {
@@ -371,22 +397,7 @@ class FormMapSampleState extends State<FormMapSample> {
           IconButton(
             icon: Icon(Icons.update),
             onPressed: () {
-                Future future = _getEvents();
-                future.then((content){
-                  if (content["success"]){                    
-                    setState(() {
-                      print(content["success"]);
-                      print(content["data"]);
-                      List<ModelEvent>events = content["data"].map<ModelEvent>((json)=>ModelEvent.fromJson(json)).toList();
-                      DBprovider.db.setEvents(events);                      
-                    });
-                  } else {
-                    _showMyDialog(content["message"].toString());
-                  }
-                setState(() {
-                  _selectEventsFromDB();
-                });
-              });
+              _getEvents();
             },
           )
         ],
