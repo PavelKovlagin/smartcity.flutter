@@ -20,8 +20,7 @@ class FormRegisterState extends State<FormRegister> {
   
 
   @override
-  Widget build(BuildContext context) {
-    user.date = _todayDate;    
+  Widget build(BuildContext context) {    
     return Scaffold(
       appBar: AppBar(
         title: Text("Регистрация")),
@@ -78,24 +77,19 @@ class FormRegisterState extends State<FormRegister> {
               },
               decoration: InputDecoration(labelText: "Отчество"),
             ),
-            Row(children: <Widget>[
-              Text(user.stringDate()),
-              SizedBox(width: 20.0),
-              new RaisedButton(onPressed: (){
+            new RaisedButton(onPressed: (){
                 DatePicker.showDatePicker(context,
                     showTitleActions: true,
                     minTime: DateTime(1800, 1, 1),
                     maxTime: DateTime(3000, 12, 31),
                     onConfirm: (date) {
                       setState(() {
-                        _todayDate = user.date;
+                        user.date = date;
                       });},
-                    currentTime: _todayDate, 
+                    currentTime: user.date, 
                     locale: LocaleType.ru);
-              }, child: Text("Выбрать дату"),
+              }, child: Text(user.stringDate()),
               ),
-            ],
-            ),
             new SizedBox(height: 20.0),
             new RaisedButton(onPressed: (){              
               _formKey.currentState.save();
@@ -105,12 +99,12 @@ class FormRegisterState extends State<FormRegister> {
                     return showDialog(
                       context: context, 
                       builder: (BuildContext context) {
-                    return AlertDialog(title: Text("Проверка"), content: Text(value["message"]),
+                    return AlertDialog(title: Text("Error"), content: Text(value["message"]),
                     );
                   });           
                 });  
               }                            
-            }, child: Text('Проверить'),
+            }, child: Text('Зарегистрироваться'),
               color: Colors.blue,
               textColor: Colors.white,)
           ],

@@ -53,6 +53,9 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+
+  
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([
@@ -63,6 +66,11 @@ class MyApp extends StatelessWidget {
 }
 
 class Home extends StatefulWidget {
+
+  var _usualTextStyle = TextStyle(fontSize: 16, color: Colors.black);
+  var _errorTextStyle = TextStyle(fontSize: 22, color: Colors.red);
+  var _successTextStype = TextStyle(fontSize: 22, color: Colors.green);
+
   @override
   State<StatefulWidget> createState() {
     // TODO: implement createState
@@ -71,6 +79,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+
   int _currentIndex = 0;
   final List<Widget> _children = [
     FormMapSample(),

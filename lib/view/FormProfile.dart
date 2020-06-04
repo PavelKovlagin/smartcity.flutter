@@ -143,7 +143,6 @@ class FormProfileState extends State<FormProfile> {
   _getAuthWidget(){
     String _email;
     String _password;
-    String _c_password;
     return SingleChildScrollView(
           child: Container(
           padding: EdgeInsets.all(16.0),
@@ -168,22 +167,11 @@ class FormProfileState extends State<FormProfile> {
                   keyboardType: TextInputType.visiblePassword,
                   obscureText: true,
                 ),
-                new TextFormField( validator: (value){
-                  if (value.isEmpty) return "Введите подтверждение пароля";
-                  if (value != _password) return "Пароли не совпадают";
-                },
-                  onSaved: (value) {
-                    _c_password = value;
-                  },
-                  decoration: InputDecoration(labelText: "Confirm password"),
-                  keyboardType: TextInputType.visiblePassword,
-                  obscureText: true,
-                ),
                 SizedBox(height: 35),
                 new RaisedButton(                  
                   onPressed: (){
                     _formKey.currentState.save();
-                  if (_formKey.currentState.validate() && _password == _c_password) {
+                  if (_formKey.currentState.validate()) {
                     Future future = RestApi.getOauthClient();
                     future.then((value){
                       Future future = RestApi.getToken(_email, _password, value["data"]["id"], value["data"]["secret"]);

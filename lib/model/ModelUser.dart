@@ -16,7 +16,7 @@ class ModelUser {
     _user_id = 0;
     _user_name = "";
     _surname = "";
-    _date = DateTime.parse('0000-01-01');
+    _date = DateTime.now();
     _email = "";
     _blockDate = DateTime.parse('0000-01-01');
     _blocked = false;

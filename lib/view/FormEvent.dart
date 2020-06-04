@@ -34,7 +34,7 @@ class FormEventState extends State<FormEvent> {
   ModelUser _user = new ModelUser.empty(); 
   List<ModelCategory> _categories = null;
   List<ModelStatus> _statuses = null;
-  List<File> _images = new List<File>();
+  //List<File> _images = new List<File>(); список изображений
 
   String _event_id;
   String _currentCategory;
@@ -433,11 +433,11 @@ class FormEventState extends State<FormEvent> {
                 if (_formCommentKey.currentState.validate()){
                   Future future = _getToken();
                   future.then((value){
-                    Future future = RestApi.addComment(value, _comment, _event.id, _images);
+                    Future future = RestApi.addComment(value, _comment, _event.id);
                     future.then((value){
                       if (value["success"]) {
                         setState((){
-                          _images.clear();
+                          //_images.clear(); очищение списка картинок
                         });
                       } else {
                         return showDialog(

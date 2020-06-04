@@ -22,7 +22,22 @@ class ModelEvent{
   List<ModelImage> _images;
 
   ModelEvent.def(){
-    
+    _id = 0;
+    _eventName = "";
+    _eventDescription ="";
+    _latitude = 0;
+    _longitude = 0;
+    _event_date = "0000-01-01";
+    _dateChange = '0000-010_01';
+    _status_id = 0;
+    _statusName = "";
+    _category_id = 0;
+    _categoryName = "";
+    _user_id = 0;
+    _email = "";
+    _visibilityForUser = 0;
+    _comments = List<ModelComment>();
+    _images = List<ModelImage>();  
   }
 
   ModelEvent(int id, 

@@ -267,7 +267,7 @@ class RestApi {
    }  
   }
 
-  static Future addComment(String token, String comment, int event_id, List<File> images) async{
+  static Future addComment(String token, String comment, int event_id) async{
     try{      
       Map<String, String> header = {
         "Authorization" : "Bearer " + token,
@@ -323,6 +323,29 @@ class RestApi {
         'category_id' : category_id.toString()
       }; 
       var res = await http.post(server + "/api/updateEvent", headers: header, body: body);
+      if (res.statusCode == 200 || res.statusCode == 418) return json.decode(res.body);
+      if (res.statusCode == 401) return _currentResponse(false, "[]", "Unauthenticated");
+      if (res.statusCode == 429) return _currentResponse(false, "[]", "Too Many Requests");
+      return _currentResponse(false, "[]", "Error load");
+    } catch (Exception){      
+     return _currentResponse(false, "[]", "Error load");
+   }  
+  }
+
+  static Future addEvent(String token,  String eventName, String eventDescription, double longitude, double latitude, int category_id) async{
+    try{
+      Map<String, String> header = {
+        "Authorization" : "Bearer " + token,
+        "Accept" : "application/json"
+      };
+      Map<String,  String> body = {
+        "eventName" : eventName,
+        "eventDescription" : eventDescription,
+        "longitude" : longitude.toString(),
+        "latitude" : latitude.toString(),
+        'category_id' : category_id.toString()
+      }; 
+      var res = await http.post(server + "/api/addEvent", headers: header, body: body);
       if (res.statusCode == 200 || res.statusCode == 418) return json.decode(res.body);
       if (res.statusCode == 401) return _currentResponse(false, "[]", "Unauthenticated");
       if (res.statusCode == 429) return _currentResponse(false, "[]", "Too Many Requests");
