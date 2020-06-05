@@ -28,7 +28,9 @@ class FormRegisterState extends State<FormRegister> {
           child: Container(
           padding: EdgeInsets.all(16.0),
             child: new Form(key: _formKey,
-              child: new Column(children: <Widget>[
+              child: new Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
                 new TextFormField(validator: (value){
                   if (value.isEmpty) return "Введите email";
                 },
@@ -77,7 +79,10 @@ class FormRegisterState extends State<FormRegister> {
               },
               decoration: InputDecoration(labelText: "Отчество"),
             ),
-            new RaisedButton(onPressed: (){
+            Row(
+              children: <Widget>[
+                new Text("Дата рождения: "),
+                new RaisedButton(onPressed: (){
                 DatePicker.showDatePicker(context,
                     showTitleActions: true,
                     minTime: DateTime(1800, 1, 1),
@@ -89,19 +94,31 @@ class FormRegisterState extends State<FormRegister> {
                     currentTime: user.date, 
                     locale: LocaleType.ru);
               }, child: Text(user.stringDate()),
-              ),
+            ),
+              ],
+            ),
+            
             new SizedBox(height: 20.0),
             new RaisedButton(onPressed: (){              
               _formKey.currentState.save();
               if (_formKey.currentState.validate()){
-                Future future = RestApi.register(user.surname, user.user_name, user.subname, user.date, user.email, _password, _c_password);
+                Future future = RestApi.register(user, _password, _c_password);
                 future.then((value){
+                  if (value["success"]){
+                    return showDialog(
+                      context: context, 
+                      builder: (BuildContext context) {
+                    return AlertDialog(title: Text("Success"), content: Text(value["message"]),
+                    );
+                  });                     
+                  } else {
                     return showDialog(
                       context: context, 
                       builder: (BuildContext context) {
                     return AlertDialog(title: Text("Error"), content: Text(value["message"]),
                     );
-                  });           
+                  }); 
+                  }                              
                 });  
               }                            
             }, child: Text('Зарегистрироваться'),

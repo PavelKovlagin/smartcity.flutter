@@ -43,7 +43,6 @@ class FormProfileState extends State<FormProfile> {
   String _user_id;
   bool _myProfile;
   final _formKey = GlobalKey<FormState>();
-  SharedPreferences preferences;
 
   ModelUser _user;
 
@@ -112,7 +111,7 @@ class FormProfileState extends State<FormProfile> {
           if (token != "null"){
             if (_user == null) {
               return FutureBuilder(
-              future: RestApi.getProfileResponse(token),
+              future: RestApi.profile(token),
               builder: (context, snapshot) {
                 if (snapshot.hasData ) {
                   if (snapshot.data["success"]) {
@@ -172,15 +171,15 @@ class FormProfileState extends State<FormProfile> {
                   onPressed: (){
                     _formKey.currentState.save();
                   if (_formKey.currentState.validate()) {
-                    Future future = RestApi.getOauthClient();
+                    Future future = RestApi.oauthClient();
                     future.then((value){
-                      Future future = RestApi.getToken(_email, _password, value["data"]["id"], value["data"]["secret"]);
+                      Future future = RestApi.token(_email, _password, value["data"]["id"], value["data"]["secret"]);
                       future.then((value){
                         if (!value["success"]) {                          
                           return showDialog(
                               context: context, 
                               builder: (BuildContext context) {                          
-                            return AlertDialog(title: Text("Ошибочка"), content: Text(value["message"]),
+                            return AlertDialog(title: Text("Error"), content: Text(value["message"]),
                             );
                           });
                         } else {
@@ -189,7 +188,8 @@ class FormProfileState extends State<FormProfile> {
                             _setToken(value["data"]);                            
                           });
                         }
-                      }); 
+                      }
+                      ); 
                     });                  
                     
                   }                    
@@ -220,7 +220,7 @@ class FormProfileState extends State<FormProfile> {
 
   _getFutureBuilderUserWidget(){
     return FutureBuilder(
-      future: RestApi.getUserResponse(_user_id),
+      future: RestApi.user(_user_id),
       builder: (context, snapshot) {
         if (snapshot.hasData ) {
           if (snapshot.data["success"]) {
@@ -322,7 +322,7 @@ class FormProfileState extends State<FormProfile> {
                       if (_formKey.currentState.validate()){
                         Future future = _getToken();
                         future.then((value){
-                          Future future = RestApi.updateUser(value, user.user_id, user.surname, user.user_name, user.subname, user.date);
+                          Future future = RestApi.updateUser(value, user);
                           future.then((value){
                             return showDialog(
                                 context: context, 
@@ -361,7 +361,7 @@ class FormProfileState extends State<FormProfile> {
                     Navigator.pushNamed(context, '/event/' + event.id.toString()).then((value){
                       Future future = _getToken();
                       future.then((value){
-                        Future future = RestApi.getProfileResponse(value);
+                        Future future = RestApi.profile(value);
                         future.then((value){
                           setState(() {
                             _user = ModelUser.fromJson(value["data"]);

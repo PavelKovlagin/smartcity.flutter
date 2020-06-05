@@ -23,14 +23,12 @@ class FormMapSampleState extends State<FormMapSample> {
   Geolocator _geolocator;
   Position _position;
 
-  String currentStatus = "Все";
-  String currentCategory = "Все";
+  String _currentStatus = "Все";
+  String _currentCategory = "Все";
   List<ModelCategory> _categories = null;
   List<ModelStatus> _statuses = null;
 
   double _userLatitude =  56.146405, _userLongitude = 40.379389; //Владимир
-  //double _userLatitude =  55.753076, _userLongitude = 37.667272; //Москва
-
 
   Future<String> _getDateLastUpdate() async{
     SharedPreferences preferences = await SharedPreferences.getInstance();
@@ -178,10 +176,10 @@ class FormMapSampleState extends State<FormMapSample> {
 
   _dropListCategories(){
     return DropdownButton(
-      value: currentCategory,
+      value: _currentCategory,
       onChanged: (String newValue) {
         setState(() {
-          currentCategory = newValue;
+          _currentCategory = newValue;
         });
       },
       hint: Text("Категория"),
@@ -195,10 +193,10 @@ class FormMapSampleState extends State<FormMapSample> {
 
   _dropListStatuses(){
     return DropdownButton(
-      value: currentStatus,
+      value: _currentStatus,
       onChanged: (String newValue) {
         setState(() {
-          currentStatus = newValue;
+          _currentStatus = newValue;
         });
       },
       hint: Text("Статус"),
@@ -221,7 +219,7 @@ class FormMapSampleState extends State<FormMapSample> {
             builder: (value){
               if (_statuses == null){
                 return FutureBuilder(
-                  future: RestApi.getStatuses(),
+                  future: RestApi.statuses(),
                   builder: (context, snapshot){
                     if (snapshot.hasData){
                       if (snapshot.data["success"]){
@@ -245,7 +243,7 @@ class FormMapSampleState extends State<FormMapSample> {
             builder: (value){
               if (_categories == null){
                 return FutureBuilder(
-                  future: RestApi.getCategories(),
+                  future: RestApi.categories(),
                   builder: (context, snapshot){
                     if (snapshot.hasData){
                       if (snapshot.data["success"]){
@@ -275,7 +273,7 @@ class FormMapSampleState extends State<FormMapSample> {
     return Expanded(
       flex: 7,
       child: FutureBuilder(
-      future: DBprovider.db.selectEvents(currentCategory, currentStatus),
+      future: DBprovider.db.selectEvents(_currentCategory, _currentStatus),
       builder: (context, snapshot) {        
         if (snapshot.hasData){
           return FutureBuilder(

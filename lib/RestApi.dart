@@ -1,11 +1,11 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:smart_city/model/ModelEvent.dart';
+import 'package:smart_city/model/ModelUser.dart';
 
 class RestApi {
-  static String server = 'http://95.66.217.238:777'; 
+  static String server = 'http://95.66.217.238:777';
 
   static _currentResponse(bool success, String data, String message){
     return {
@@ -15,7 +15,7 @@ class RestApi {
     };
   }
 
-  static Future getEventResponse(String event_id) async {
+  static Future event(String event_id) async {
     try{
       var res = await http.get(server + "/api/event?event_id=" + event_id);
       if (res.statusCode == 200 || res.statusCode == 418) {
@@ -28,7 +28,7 @@ class RestApi {
    }  
   }
 
-  static Future getProfileResponse(String token) async {
+  static Future profile(String token) async {
     try{
       Map<String, String> headers = {
         "Authorization": "Bearer " + token,
@@ -47,7 +47,7 @@ class RestApi {
    }  
   }
 
-  static Future getUserResponse(String user_id) async {
+  static Future user(String user_id) async {
     try{
       var res = await http.get(server + "/api/user/" + user_id );
       if (res.statusCode == 200 || res.statusCode == 418) {
@@ -62,7 +62,7 @@ class RestApi {
    }  
   }
 
-  static Future getOauthClient() async{
+  static Future oauthClient() async{
     try{
       var res = await http.get(server + "/api/getOauthClient");
       if (res.statusCode == 200 || res.statusCode == 418) {
@@ -77,7 +77,7 @@ class RestApi {
    }  
   }
 
-  static Future getToken(String username, String password, int client_id, String client_secret) async{
+  static Future token(String username, String password, int client_id, String client_secret) async{
     try{
       Map<String, String> param = {
         "username": username,
@@ -101,53 +101,8 @@ class RestApi {
      return _currentResponse(false, "[]", "TRY");
    }  
   }  
-
-  static Future<List<ModelEvent>> getEventResponse2(String event_id) async {
-    List<ModelEvent> events;
-    String link = server +'event?event_id=' + event_id;
-    var res = await http.get(Uri.encodeFull(link));
-    if (res.statusCode == 200) {
-
-      // If the server did return a 200 OK response, then parse the JSON.
-      var data = json.decode(res.body);
-      var rest = data as List;
-      print(rest);
-      events = rest.map<ModelEvent>((json)=>ModelEvent.fromJson(json)).toList();
-      print("List Size: ${events.length}");
-    }     
-    return events;
-  }
     
-  static Future<List<ModelEvent>> getEvents(String date) async {
-    List<ModelEvent> events = new List<ModelEvent>();
-    String link = server + "events?dateChange=" + date;
-    try{
-      var res = await http.get(link);
-      if (res.statusCode == 200 || res.statusCode == 418) {
-        var response = json.decode(res.body);
-        var success = response["success"] as bool;
-        var data = response["data"];
-        var message = response["message"];
-        switch (res.statusCode) {
-          case 200:
-            // If the server did return a 200 OK response, then parse the JSON.
-            print("Success === " + success.toString());
-            print("Data === ");
-            print("Message ==== " + message.toString());
-            events = data.map<ModelEvent>((json)=>ModelEvent.fromJson(json)).toList();
-            print("List Size: ${events.length}");
-            break;
-          case 418:
-            print("Success: " + success.toString() + ", Message: " + message.toString());
-        }
-      }   
-    } catch (Exception){
-     print("false load");
-   }
-    return events;
-  }
-
-  static Future getStatuses() async{
+  static Future statuses() async{
     try{
       Map<String, String> accept = {
         "Accept": "application/json"
@@ -162,7 +117,7 @@ class RestApi {
    }  
   }
 
-  static Future getCategories() async{
+  static Future categories() async{
     try{
       Map<String, String> heared = {
         "Accept": "application/json"
@@ -177,18 +132,18 @@ class RestApi {
    }  
   }
 
-  static Future updateUser(String token, int user_id, String surname, String name, String subname, DateTime date) async{
+  static Future updateUser(String token, ModelUser user) async{
     try{
       Map<String, String> heared = {
         "Accept": "application/json",
         "Authorization": "Bearer " + token
       };
       Map<String, String> body = {
-        "user_id" : user_id.toString(),
-        "surname" : surname,
-        "name" : name,
-        "subname" : subname,
-        "date" : date.year.toString()+"-"+date.month.toString()+"-"+date.day.toString()
+        "user_id" : user.user_id.toString(),
+        "surname" : user.surname,
+        "name" : user.user_name,
+        "subname" : user.subname,
+        "date" : user.date.year.toString()+"-"+user.date.month.toString()+"-"+user.date.day.toString()
       }; 
       var res = await http.post(server + "/api/updateUser", headers: heared, body: body);
       if (res.statusCode == 200 || res.statusCode == 418) return json.decode(res.body);
@@ -200,14 +155,14 @@ class RestApi {
    }  
   }
 
-  static Future register(String surname, String name, String subname, DateTime date, String email, String password, String c_password) async{
+  static Future register(ModelUser user, String password, String c_password) async{
     try{
       Map<String, String> body = {
-        "surname" : surname,
-        "name" : name,
-        "subname" : subname,
-        "date" : date.year.toString()+"-"+date.month.toString()+"-"+date.day.toString(),
-        "email" : email,
+        "surname" : user.surname,
+        "name" : user.user_name,
+        "subname" : user.subname,
+        "date" : user.date.year.toString()+"-"+user.date.month.toString()+"-"+user.date.day.toString(),
+        "email" : user.email,
         "password" : password,
         "c_password" : c_password
       }; 
@@ -295,19 +250,19 @@ class RestApi {
    }  
   }
 
-  static Future updateEvent(String token, int event_id,  String eventName, String eventDescription, double longitude, double latitude, int category_id) async{
+  static Future updateEvent(String token, ModelEvent event) async{
     try{
       Map<String, String> header = {
         "Authorization" : "Bearer " + token,
         "Accept" : "application/json"
       };
       Map<String,  String> body = {
-        "event_id" : event_id.toString(),
-        "eventName" : eventName,
-        "eventDescription" : eventDescription,
-        "longitude" : longitude.toString(),
-        "latitude" : latitude.toString(),
-        'category_id' : category_id.toString()
+        "event_id" : event.id.toString(),
+        "eventName" : event.eventName,
+        "eventDescription" : event.eventDescription,
+        "longitude" : event.longitude.toString(),
+        "latitude" : event.latitude.toString(),
+        'category_id' : event.category_id.toString()
       }; 
       var res = await http.post(server + "/api/updateEvent", headers: header, body: body);
       if (res.statusCode == 200 || res.statusCode == 418) return json.decode(res.body);
@@ -319,18 +274,18 @@ class RestApi {
    }  
   }
 
-  static Future addEvent(String token,  String eventName, String eventDescription, double longitude, double latitude, int category_id) async{
+  static Future addEvent(String token, ModelEvent event) async{
     try{
       Map<String, String> header = {
         "Authorization" : "Bearer " + token,
         "Accept" : "application/json"
       };
       Map<String,  String> body = {
-        "eventName" : eventName,
-        "eventDescription" : eventDescription,
-        "longitude" : longitude.toString(),
-        "latitude" : latitude.toString(),
-        'category_id' : category_id.toString()
+        "eventName" : event.eventName,
+        "eventDescription" : event.eventDescription,
+        "longitude" : event.longitude.toString(),
+        "latitude" : event.latitude.toString(),
+        'category_id' : event.category_id.toString()
       }; 
       var res = await http.post(server + "/api/addEvent", headers: header, body: body);
       if (res.statusCode == 200 || res.statusCode == 418) return json.decode(res.body);

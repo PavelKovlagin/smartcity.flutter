@@ -2,12 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_city/RestApi.dart';
 import 'package:smart_city/model/ModelCategory.dart';
 import 'package:smart_city/model/ModelEvent.dart';
-import 'package:smart_city/model/ModelStatus.dart';
 import 'package:smart_city/model/ModelUser.dart';
 
 class FormEvent extends StatefulWidget {
@@ -33,8 +31,6 @@ class FormEventState extends State<FormEvent> {
   ModelEvent _event = ModelEvent.def();
   ModelUser _user = new ModelUser.empty(); 
   List<ModelCategory> _categories = null;
-  List<ModelStatus> _statuses = null;
-  //List<File> _images = new List<File>(); список изображений
 
   String _event_id;
   String _currentCategory;
@@ -161,7 +157,7 @@ class FormEventState extends State<FormEvent> {
                 {
                   Future future = _getToken();
                   future.then((value){
-                    Future future = RestApi.updateEvent(value, _event.id, _event.eventName, _event.eventDescription, _event.longitude, _event.latitude, _newCategoryId);
+                    Future future = RestApi.updateEvent(value, _event);
                     future.then((value){
                       if (value["success"]){
                         setState(() {});
@@ -202,7 +198,7 @@ class FormEventState extends State<FormEvent> {
                     Builder(builder: (value){
                       if (_categories == null){
                         return FutureBuilder(
-                          future: RestApi.getCategories(),
+                          future: RestApi.categories(),
                           builder: (context, snapshot){
                             if (snapshot.hasData){
                               if (snapshot.data["success"]){
@@ -473,7 +469,7 @@ class FormEventState extends State<FormEvent> {
         margin: EdgeInsets.all(8.0),
         
         child: FutureBuilder(
-          future: RestApi.getEventResponse(_event_id),
+          future: RestApi.event(_event_id),
           builder: (context, snapshotEvent){          
           if (snapshotEvent.hasData){
             _event = ModelEvent.fromJson(snapshotEvent.data["data"]);            
@@ -482,7 +478,7 @@ class FormEventState extends State<FormEvent> {
               builder: (context, snapshotToken){
                 if (snapshotToken.hasData){                  
                   return FutureBuilder(
-                    future: RestApi.getProfileResponse(snapshotToken.data),
+                    future: RestApi.profile(snapshotToken.data),
                     builder: (context, snapshotUser) {
                       if (snapshotUser.hasData){                        
                         if (snapshotUser.data["success"]){

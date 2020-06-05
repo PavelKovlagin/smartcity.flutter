@@ -124,7 +124,7 @@ class FormAddEventState extends State<FormAddEvent>{
           builder: (value){
             if (_categories == null){
               return FutureBuilder(
-                future: RestApi.getCategories(),
+                future: RestApi.categories(),
                 builder: (context, snapshot){
                   if (snapshot.hasData){
                     if (snapshot.data["success"]){
@@ -224,7 +224,8 @@ class FormAddEventState extends State<FormAddEvent>{
                     if (_formKey.currentState.validate()){
                       Future future = _getToken();
                       future.then((value){
-                        Future future = RestApi.addEvent(value, _event.eventName, _event.eventDescription, _event.longitude, _event.latitude, _newCategoryId);
+                      _event.category_id =_newCategoryId;
+                        Future future = RestApi.addEvent(value, _event);
                         future.then((value){
                           if(value['success']){
                             Navigator.of(context).pop();                            
